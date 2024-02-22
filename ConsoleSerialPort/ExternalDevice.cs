@@ -12,9 +12,9 @@ namespace ConsoleSerialPort
 {
     abstract class ExternalDevice
     {
-        public string Name { get; set; }
-        public string Description { get; set; }
-        public string SerialPort { get; set; }
+        public string? Name { get; set; }
+        public string? Description { get; set; }
+        public string? SerialPort { get; set; }
         public int SerialPortSpeed { get; set; }
         public bool IsConnected { get; set; }
         public bool Enabled { get; set; }
@@ -23,9 +23,9 @@ namespace ConsoleSerialPort
 
         public abstract bool Connect();
         public abstract void Disconnect();
-        public abstract void Start();
+        public abstract Task StartAsync();
         public abstract void Stop();
-        public abstract string ReadReponse();
+        
 
 
     }
@@ -39,6 +39,8 @@ namespace ConsoleSerialPort
 
         public IzmDiam(string serialPort, int serialSpeed)
         {
+            Name = "IzmDiam";
+            Description = "IzmDiam";
             SerialPort = serialPort;
             SerialPortSpeed = serialSpeed;
             Data = new List<float>();
@@ -72,7 +74,7 @@ namespace ConsoleSerialPort
             
         }
 
-        public override void Start()
+        public async override Task StartAsync()
         {
             Enabled = true;
             int dataVolume = 100;
@@ -87,9 +89,11 @@ namespace ConsoleSerialPort
                     _serial485ToTTL.Write(SentMessage.CreateMessage(), 0, 8);
                     _gpioOrange.Write(_serial_swich, PinValue.Low);
                     listData[i] = ReadReponse();
+                    await Task.Delay(1000);
                 } 
                 SendData(listDiamX, listDiamY);
-            }            
+            }
+            
         }
 
         public override void Stop()
@@ -98,7 +102,7 @@ namespace ConsoleSerialPort
             throw new NotImplementedException();
         }
 
-        public override string ReadReponse()
+        public string ReadReponse()
         {
             var byteBuffer = this.GetData();
             CheckResponse(byteBuffer);

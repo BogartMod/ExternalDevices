@@ -9,13 +9,20 @@ namespace ConsoleSerialPort
 {
     class Program
     {
-        static void Main(string[] args)
+        async static Task Main(string[] args)
         {
             var izmDiam = new IzmDiam("/dev/ttyS5", 9600);
             izmDiam.Connect();
-            izmDiam.Start();
+            izmDiam.StartAsync();
             izmDiam.Stop();
             izmDiam.Disconnect();
+
+
+        }
+
+        public async Task SaveDataAsync(IzmDiam izmDiam)
+        {
+
         }
 
     }
