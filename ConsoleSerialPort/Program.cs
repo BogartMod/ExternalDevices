@@ -2,6 +2,8 @@
 using System.IO.Ports;
 using Iot.Device;
 using System.Device.Gpio;
+using System.Configuration;
+using System.Collections.Specialized;
 
 
 

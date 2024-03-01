@@ -8,9 +8,18 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="App.config" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Iot.Device.Bindings" Version="3.1.0" />
+    <PackageReference Include="System.Configuration.ConfigurationManager" Version="8.0.0" />
     <PackageReference Include="System.Device.Gpio" Version="3.1.0" />
     <PackageReference Include="System.IO.Ports" Version="8.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Include="App.config" />
   </ItemGroup>
 
 </Project>

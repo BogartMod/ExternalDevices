@@ -1,4 +1,5 @@
-﻿using Iot.Device.Mcp23xxx;
+﻿using Iot.Device.Card.Ultralight;
+using Iot.Device.Mcp23xxx;
 using Iot.Device.Mfrc522;
 using System;
 using System.Collections.Generic;
@@ -7,6 +8,8 @@ using System.IO.Ports;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Configuration;
+using System.Collections.Specialized;
 
 namespace ConsoleSerialPort
 {
@@ -18,8 +21,8 @@ namespace ConsoleSerialPort
         public int SerialPortSpeed { get; set; }
         public bool IsConnected { get; set; }
         public bool Enabled { get; set; }
-        public List<float> Data { get; set; }
-        public List<string> DataDescription { get; set; }
+        public List<float>? Data { get; set; }
+        public List<string>? DataDescription { get; set; }
 
         public abstract bool Connect();
         public abstract void Disconnect();
@@ -33,14 +36,15 @@ namespace ConsoleSerialPort
 
     class IzmDiam : ExternalDevice
     {
-        private int _serial_swich = 75; // пин управления переключением 485
+        //private int _serial_swich = 75; // пин управления переключением 485
+        private int _serial_swich = Int32.Parse(ConfigurationManager.AppSettings.Get("serial_swich_port"));
         private GpioOrange? _gpioOrange;
         private SerialPort? _serial485ToTTL;
 
         public IzmDiam(string serialPort, int serialSpeed)
         {
-            Name = "IzmDiam";
-            Description = "IzmDiam";
+            Name = ConfigurationManager.AppSettings.Get("IzmDiamName");
+            Description = ConfigurationManager.AppSettings.Get("IzmDiamDescription");
             SerialPort = serialPort;
             SerialPortSpeed = serialSpeed;
             Data = new List<float>();
