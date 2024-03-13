@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Configuration;
 using System.Collections.Specialized;
+using System.ComponentModel;
 
 namespace ConsoleSerialPort
 {
@@ -22,11 +23,12 @@ namespace ConsoleSerialPort
         public bool IsConnected { get; set; }
         public bool Enabled { get; set; }
         public List<float>? Data { get; set; }
+        public List<DateTime>? Date { get; set; }
         public List<string>? DataDescription { get; set; }
 
         public abstract bool Connect();
         public abstract void Disconnect();
-        public abstract Task StartAsync();
+        public abstract Task StartAsync(CancellationToken token);
         public abstract void Stop();
         
 
@@ -36,17 +38,21 @@ namespace ConsoleSerialPort
 
     class IzmDiam : ExternalDevice
     {
-        //private int _serial_swich = 75; // пин управления переключением 485
-        private int _serial_swich = Int32.Parse(ConfigurationManager.AppSettings.Get("serial_swich_port"));
-        private GpioOrange? _gpioOrange;
+        private int _serial_swich; // пин управления переключением 485
+        private int _delayMS;
+        int dataCapacity;
+        //private GpioOrange? _gpioOrange;
         private SerialPort? _serial485ToTTL;
 
-        public IzmDiam(string serialPort, int serialSpeed)
+        public IzmDiam(string serialPort, int serialSpeed = 9600)
         {
             Name = ConfigurationManager.AppSettings.Get("IzmDiamName");
             Description = ConfigurationManager.AppSettings.Get("IzmDiamDescription");
+            _serial_swich = Int32.Parse(ConfigurationManager.AppSettings.Get("serial_swich_port"));
             SerialPort = serialPort;
             SerialPortSpeed = serialSpeed;
+            _delayMS = Int32.Parse(ConfigurationManager.AppSettings.Get("IzmDiamDelayMS"));
+            dataCapacity = Int32.Parse(ConfigurationManager.AppSettings.Get("IzmDiamCapacityStack"));
             Data = new List<float>();
             DataDescription = new List<string>();
             IsConnected = false;
@@ -55,7 +61,7 @@ namespace ConsoleSerialPort
 
         public override bool Connect()
         {
-            _gpioOrange = new GpioOrange(_serial_swich);
+            //_gpioOrange = new GpioOrange(_serial_swich);
             _serial485ToTTL = SerialConnect(SerialPort, SerialPortSpeed);
             IsConnected = true;
 
@@ -67,68 +73,101 @@ namespace ConsoleSerialPort
         {
             if (IsConnected)
             {
-                _gpioOrange?.ClosePin(_serial_swich);
-                _gpioOrange?.Disconnect();
+                //_gpioOrange?.ClosePin(_serial_swich);
+                //_gpioOrange?.Disconnect();
                 _serial485ToTTL?.Close();
 
-                _gpioOrange = null;
+                //_gpioOrange = null;
                 _serial485ToTTL = null;
                 IsConnected = false;
             }
             
         }
 
-        public async override Task StartAsync()
+        public async override Task StartAsync(CancellationToken token)
         {
             Enabled = true;
-            int dataVolume = 100;
-            var listData = new List<string>(dataVolume);
-            var listDiamX = new List<string>(dataVolume);
-            var listDiamY = new List<string>(dataVolume);
-            while (Enabled)
+            
+            var listData = new List<string>(dataCapacity);
+            var listDiamX = new List<string>(dataCapacity);
+            var listDiamY = new List<string>(dataCapacity);
+            
+            try
             {
-                for (int i = 0; i < listData.Capacity; i++)
+                while (Enabled)
                 {
-                    _gpioOrange.Write(_serial_swich, PinValue.High);
-                    _serial485ToTTL.Write(SentMessage.CreateMessage(), 0, 8);
-                    _gpioOrange.Write(_serial_swich, PinValue.Low);
-                    listData[i] = ReadReponse();
-                    await Task.Delay(1000);
-                } 
-                SendData(listDiamX, listDiamY);
+                    for (int i = 0; i < listData.Capacity; i++)
+                    {
+                        Console.WriteLine(i);
+                        //_gpioOrange.Write(_serial_swich, PinValue.High);
+                        _serial485ToTTL.Write(SentMessage.CreateMessage(), 0, 8);
+                        //_gpioOrange.Write(_serial_swich, PinValue.Low);
+                        listData.Add(ReadReponse());
+                        Console.WriteLine(listData[i]);
+                        await Task.Delay(_delayMS);
+                        if (token.IsCancellationRequested) break;
+                    }
+                    SendData(listDiamX, listDiamY);
+                }
             }
+
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            
             
         }
 
         public override void Stop()
         {
             Enabled &= false;
-            throw new NotImplementedException();
+            
         }
 
         public string ReadReponse()
         {
-            var byteBuffer = this.GetData();
-            CheckResponse(byteBuffer);
-
-            return byteBuffer.ToString();
+            try
+            {
+                var byteBuffer = this.GetData();
+                //CheckResponse(byteBuffer);
+                int i = byteBuffer[4] | byteBuffer[3] << 8;
+                return i.ToString();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message, ex);
+                return "";
+            }
+            
         }
 
         public byte[] GetData()
         {
             int offset = 0;
-            var byteBuffer = new byte[9];
-            while (offset < 9)
+            var byteBuffer = new byte[13];
+            try
             {
-                offset += _serial485ToTTL.Read(byteBuffer, offset, byteBuffer.Length - offset);
+                while (offset < byteBuffer.Length)
+                {
+                    offset += _serial485ToTTL.Read(byteBuffer, offset, byteBuffer.Length - offset);
+                }
             }
-
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            
+            foreach (byte byt1 in byteBuffer)
+            {
+                Console.Write(byt1 + " ");
+            }
             return byteBuffer;
         }
 
         static void CheckResponse(byte[] respones)
         {
-            throw new NotImplementedException();
+            //throw new NotImplementedException();
             // здесь проверяем контрольную сумму, номер железки и номер функции
         }
 
@@ -136,7 +175,7 @@ namespace ConsoleSerialPort
         {
             foreach (var item in listDiamX) Console.WriteLine(item);
             foreach (var item in listDiamY) Console.WriteLine(item);
-            throw new NotImplementedException();
+            
         }
 
         static SerialPort SerialConnect(string port, int speed)

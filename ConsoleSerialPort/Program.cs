@@ -11,15 +11,68 @@ namespace ConsoleSerialPort
 {
     class Program
     {
-        async static Task Main(string[] args)
+        static void Main(string[] args)
         {
-            var izmDiam = new IzmDiam("/dev/ttyS5", 9600);
-            izmDiam.Connect();
-            izmDiam.StartAsync();
-            izmDiam.Stop();
-            izmDiam.Disconnect();
+            while (true)
+            {
+                ConsoleMenu();
+            }
 
+        }
 
+        static async void ConsoleMenu()
+        {
+            CancellationTokenSource cancelTokenSource = new CancellationTokenSource();
+            CancellationToken token = cancelTokenSource.Token;
+
+            var appSettings = ConfigurationManager.AppSettings;
+
+            Task IzmWorkTask = null;
+
+            //var izmDiam = new IzmDiam(
+            //    serialPort: ConfigurationManager.AppSettings.Get("IzmDiamPort"),
+            //    serialSpeed: Int32.Parse(ConfigurationManager.AppSettings.Get("IzmDiamSpeed")) );
+            var izmDiam = new IzmDiam(
+                serialPort: "COM13",
+                serialSpeed: Int32.Parse(
+                    ConfigurationManager.AppSettings.Get("IzmDiamSpeed"))
+                );
+
+            string cons = Console.ReadLine();
+
+            switch (cons)
+            {
+                case "start":
+                    Console.WriteLine("Подключаем.");
+                    await Task.Run(() => izmDiam.Connect());
+                    Console.WriteLine("Подключились. Начинаем записывать");
+                    IzmWorkTask = izmDiam.StartAsync(token);
+                    break;
+
+                case "stop":
+                    cancelTokenSource.Cancel();
+                    Console.WriteLine("Остановка");
+                    izmDiam.Stop();
+                    izmDiam.Disconnect();
+                    if (IzmWorkTask != null) await IzmWorkTask;
+
+                    break;
+
+                case "exit":
+                    cancelTokenSource.Dispose();
+                    break;
+
+                case "help":
+                    Console.WriteLine("start - запуск отслеживания");
+                    Console.WriteLine("stop - остановка ослеживания");
+                    Console.WriteLine("exit - завершить программу");
+                    Console.WriteLine("help - вывод подсказки");
+                    break;
+
+                default:
+                    Console.WriteLine("Неизвестная комманда. Список комманд: help");
+                    break;
+            }
         }
 
         public async Task SaveDataAsync(IzmDiam izmDiam)
