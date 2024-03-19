@@ -5,7 +5,6 @@ using System.Device.Gpio;
 using System.Configuration;
 using System.Collections.Specialized;
 using static ConsoleSerialPort.IzmDiam;
-using System.Text.Json;
 using ConsoleSerialPort;
 
 
@@ -94,14 +93,14 @@ namespace ConsoleSerialPort
                     var fileData = new FileData();
                     while (token.IsCancellationRequested)
                     {
-                        for (int i = 0; i < FileData.DataCapacity; i++)
+                        for (int i = 0; i < fileData.DataCapacity; i++)
                         {
-                            FileData.ListDiamX.Add("");
-                            FileData.ListDiamY.Add("");
+                            fileData.ListDiamX.Add("");
+                            fileData.ListDiamY.Add("");
                             await Task.Delay(_delayMS);
                         }
 
-                        SaveDataAsync(fileData);
+                        fileData.SaveToFileAsync();
                     }
                 }
 
@@ -114,16 +113,6 @@ namespace ConsoleSerialPort
             void Exit()
             {
                 cancelTokenSource.Dispose();
-            }
-
-            async Task SaveDataAsync(FileData fileData)
-            {
-                using (FileStream fs = new FileStream("user.json", FileMode.OpenOrCreate))
-                {
-                    
-                    await JsonSerializer.SerializeAsync<FileData>(fs, fileData);
-                    Console.WriteLine("Data has been saved to file");
-                }
             }
 
         }

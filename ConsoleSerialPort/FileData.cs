@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
+using System.Text.Json;
 
 namespace ConsoleSerialPort
 {
@@ -30,5 +32,13 @@ namespace ConsoleSerialPort
             ListSpeed = new List<string>(DataCapacity);
         }
 
+        public void SaveToFileAsync()
+        {
+            using (FileStream fs = new FileStream("user.json", FileMode.OpenOrCreate))
+            {
+                await JsonSerializer.SerializeAsync<FileData>(fs, fileData);
+                Console.WriteLine("Data has been saved to file");
+            }
+        }
     }
 }
