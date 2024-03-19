@@ -1,34 +1,57 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Data;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace ConsoleSerialPort
 {
     class FileData
     {
-        public static string LineName;
-        public static int DataCapacity { get; set; }
-        public static List<string> ListData { get; set; }
-        public static List<string> ListDiamX { get; set; }
-        public static List<string> ListDiamY { get; set; }
-        public static List<DateTime> ListDateTimeData { get; set; }
-        public static List<string> ListLength {  get; set; }
-        public static List<string> ListSpeed { get; set; }
+        public class DataPackage
+        {
+            public string DiamX {  get; set; }
+            public string DiamY { get; set; }
+            public string CurrentDistance { get; set; }
+            public string CurrentSpeed { get; set; }
+            public DateTime CurrentTime { get; set; }
+        } 
+
+        public string LineName { get; set; }
+        public int DataCapacity { get; set; }
+        public  List<DataPackage> Data { get; set; }
 
         public FileData()
         {
             LineName = ConfigurationManager.AppSettings.Get("LineName");
-            DataCapacity = Int32.Parse(ConfigurationManager.AppSettings.Get("IzmDiamCapacityStack"));
-            ListData = new List<string>(DataCapacity);
-            ListDiamX = new List<string>(DataCapacity);
-            ListDiamY = new List<string>(DataCapacity);
-            ListDateTimeData = new List<DateTime>(DataCapacity);
-            ListLength = new List<string>(DataCapacity);
-            ListSpeed = new List<string>(DataCapacity);
-        }
+            DataCapacity = Int32.Parse(ConfigurationManager.AppSettings.Get("DataCapacityStack"));
+            Data = new List<DataPackage>(DataCapacity);
+        }ы
 
+        public async Task SaveToFileAsync()
+        {
+            using (FileStream fs = new FileStream("user.json", FileMode.OpenOrCreate))
+            {
+                try
+                {
+                    var options = new JsonSerializerOptions
+                    {
+                        WriteIndented = true,
+                        //DefaultIgnoreCondition = JsonIgnoreCondition.Always,
+                        IgnoreReadOnlyProperties = false,
+
+                    };
+                    await JsonSerializer.SerializeAsync<FileData>(fs, this);
+                    Console.WriteLine("Data has been saved to file");
+                }
+                catch (Exception ex )
+                { Console.WriteLine(ex.ToString()); }
+                
+            }
+        }
     }
 }

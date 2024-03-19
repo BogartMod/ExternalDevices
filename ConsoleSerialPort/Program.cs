@@ -5,8 +5,8 @@ using System.Device.Gpio;
 using System.Configuration;
 using System.Collections.Specialized;
 using static ConsoleSerialPort.IzmDiam;
-using System.Text.Json;
 using ConsoleSerialPort;
+using System.Runtime.CompilerServices;
 
 
 
@@ -85,23 +85,32 @@ namespace ConsoleSerialPort
             }
             async Task WorkAsync()
             {
-                int _delayMS = Int32.Parse(ConfigurationManager.AppSettings.Get("IzmDiamDelayMS"));
+                int _delayMS = Int32.Parse(ConfigurationManager.AppSettings.Get("ReadDelayMS"));
                 
-                IzmWorkTask = izmDiam.StartAsync(token);
-
                 try
                 {
                     var fileData = new FileData();
-                    while (token.IsCancellationRequested)
+                    while (!token.IsCancellationRequested)
                     {
-                        for (int i = 0; i < FileData.DataCapacity; i++)
+                        for (int i = 0; i < fileData.DataCapacity; i++)
                         {
-                            FileData.ListDiamX.Add("");
-                            FileData.ListDiamY.Add("");
-                            await Task.Delay(_delayMS);
-                        }
+                            string[] dataXY = izmDiam.GetData().Split(' ');
+                            //fileData.ListDiamX.Add(dataXY[0]);
+                            //fileData.ListDiamY.Add(dataXY[1]);
+                            //fileData.ListDateTimeData.Add(DateTime.Now);
 
-                        SaveDataAsync(fileData);
+                            fileData.Data.Add(new FileData.DataPackage());
+
+                            fileData.Data[i].DiamX = dataXY[0];
+                            fileData.Data[i].DiamY = dataXY[1];
+                            fileData.Data[i].CurrentTime = DateTime.Now;
+
+                            Console.WriteLine(dataXY[0] + " " + dataXY[1]);
+                            await Task.Delay(_delayMS);
+
+                        }
+                        cancelTokenSource.Cancel();
+                        fileData.SaveToFileAsync();
                     }
                 }
 
@@ -114,16 +123,7 @@ namespace ConsoleSerialPort
             void Exit()
             {
                 cancelTokenSource.Dispose();
-            }
-
-            async Task SaveDataAsync(FileData fileData)
-            {
-                using (FileStream fs = new FileStream("user.json", FileMode.OpenOrCreate))
-                {
-                    
-                    await JsonSerializer.SerializeAsync<FileData>(fs, fileData);
-                    Console.WriteLine("Data has been saved to file");
-                }
+                Environment.Exit(0);
             }
 
         }

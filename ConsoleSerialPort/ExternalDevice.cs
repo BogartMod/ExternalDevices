@@ -21,14 +21,11 @@ namespace ConsoleSerialPort
         public string? SerialPort { get; set; }
         public int SerialPortSpeed { get; set; }
         public bool IsConnected { get; set; }
-        public bool Enabled { get; set; }
-        public List<float>? Data { get; set; }
-        public List<DateTime>? Date { get; set; }
-        public List<string>? DataDescription { get; set; }
-
+        public bool IsEnabled { get; set; }
+                
         public abstract bool Connect();
         public abstract void Disconnect();
-        public abstract Task StartAsync(CancellationToken token);
+        public abstract string GetData();
         public abstract void Stop();
         
 
@@ -50,10 +47,8 @@ namespace ConsoleSerialPort
             _serial_swich = Int32.Parse(ConfigurationManager.AppSettings.Get("serial_swich_port"));
             SerialPort = serialPort;
             SerialPortSpeed = serialSpeed;
-            Data = new List<float>();
-            DataDescription = new List<string>();
             IsConnected = false;
-            Enabled = false;
+            IsEnabled = false;
         }
 
         public override bool Connect()
@@ -81,21 +76,26 @@ namespace ConsoleSerialPort
             
         }
 
-        public async override Task StartAsync(CancellationToken token)
+        public override string GetData()
         {
-            Enabled = true;
+            IsEnabled = true;
             
             try
             {
                 //_gpioOrange.Write(_serial_swich, PinValue.High);
                 _serial485ToTTL.Write(SentMessage.CreateMessage(), 0, 8);
                 //_gpioOrange.Write(_serial_swich, PinValue.Low);
-                ReadReponse();
+                var byteBuffer = this.ReadData();
+                //CheckResponse(byteBuffer);
+                int withX = byteBuffer[3] << 8 | byteBuffer[4];
+                int withY = byteBuffer[5] << 8 | byteBuffer[6];
+                return withX.ToString() + ' ' + withY.ToString();
             }
 
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
+                return ex.Message;
             }
             
             
@@ -103,28 +103,11 @@ namespace ConsoleSerialPort
 
         public override void Stop()
         {
-            Enabled &= false;
+            IsEnabled &= false;
             
         }
 
-        public string ReadReponse()
-        {
-            try
-            {
-                var byteBuffer = this.GetData();
-                //CheckResponse(byteBuffer);
-                int i = byteBuffer[4] | byteBuffer[3] << 8;
-                return i.ToString();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message, ex);
-                return "";
-            }
-            
-        }
-
-        public byte[] GetData()
+        public byte[] ReadData()
         {
             int offset = 0;
             var byteBuffer = new byte[13];
@@ -139,11 +122,6 @@ namespace ConsoleSerialPort
             {
                 Console.WriteLine(ex.Message);
             }
-            
-            foreach (byte byt1 in byteBuffer)
-            {
-                Console.Write(byt1 + " ");
-            }
             return byteBuffer;
         }
 
@@ -151,13 +129,6 @@ namespace ConsoleSerialPort
         {
             //throw new NotImplementedException();
             // здесь проверяем контрольную сумму, номер железки и номер функции
-        }
-
-        private void SendData(List<string> listDiamX, List<string> listDiamY)
-        {
-            foreach (var item in listDiamX) Console.WriteLine(item);
-            foreach (var item in listDiamY) Console.WriteLine(item);
-            
         }
 
         static SerialPort SerialConnect(string port, int speed)
