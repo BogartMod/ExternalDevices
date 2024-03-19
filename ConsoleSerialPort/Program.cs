@@ -4,6 +4,9 @@ using Iot.Device;
 using System.Device.Gpio;
 using System.Configuration;
 using System.Collections.Specialized;
+using static ConsoleSerialPort.IzmDiam;
+using System.Text.Json;
+using ConsoleSerialPort;
 
 
 
@@ -42,7 +45,7 @@ namespace ConsoleSerialPort
                         break;
 
                     case "stop":
-                        Stop();
+                        StopAsync();
                         break;
 
                     case "exit":
@@ -62,31 +65,65 @@ namespace ConsoleSerialPort
                 }
             }
 
-            async void Start()
+            void Start()
             {
                 Console.WriteLine("Подключаем.");
                 izmDiam.Connect();
                 Console.WriteLine("Подключились. Начинаем записывать");
-                Work();
+                WorkAsync();
                 
             }
-            async void Stop()
+            async Task StopAsync()
             {
                 cancelTokenSource.Cancel();
                 Console.WriteLine("Остановка");
                 izmDiam.Stop();
                 izmDiam.Disconnect();
                 if (IzmWorkTask != null) await IzmWorkTask;
+                Console.WriteLine("Процесс остановлен");
 
             }
-            async Task Work()
+            async Task WorkAsync()
             {
+                int _delayMS = Int32.Parse(ConfigurationManager.AppSettings.Get("IzmDiamDelayMS"));
+                
                 IzmWorkTask = izmDiam.StartAsync(token);
+
+                try
+                {
+                    var fileData = new FileData();
+                    while (token.IsCancellationRequested)
+                    {
+                        for (int i = 0; i < FileData.DataCapacity; i++)
+                        {
+                            FileData.ListDiamX.Add("");
+                            FileData.ListDiamY.Add("");
+                            await Task.Delay(_delayMS);
+                        }
+
+                        SaveDataAsync(fileData);
+                    }
+                }
+
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                }
             }
 
             void Exit()
             {
                 cancelTokenSource.Dispose();
+            }
+
+            async Task SaveDataAsync(FileData fileData)
+            {
+                using (FileStream fs = new FileStream("user.json", FileMode.OpenOrCreate))
+                {
+                    
+                    await JsonSerializer.SerializeAsync<FileData>(fs, fileData);
+                    Console.WriteLine("Data has been saved to file");
+                }
             }
 
         }

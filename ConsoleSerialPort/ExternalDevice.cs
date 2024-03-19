@@ -39,8 +39,7 @@ namespace ConsoleSerialPort
     class IzmDiam : ExternalDevice
     {
         private int _serial_swich; // пин управления переключением 485
-        private int _delayMS;
-        int dataCapacity;
+        
         //private GpioOrange? _gpioOrange;
         private SerialPort? _serial485ToTTL;
 
@@ -51,8 +50,6 @@ namespace ConsoleSerialPort
             _serial_swich = Int32.Parse(ConfigurationManager.AppSettings.Get("serial_swich_port"));
             SerialPort = serialPort;
             SerialPortSpeed = serialSpeed;
-            _delayMS = Int32.Parse(ConfigurationManager.AppSettings.Get("IzmDiamDelayMS"));
-            dataCapacity = Int32.Parse(ConfigurationManager.AppSettings.Get("IzmDiamCapacityStack"));
             Data = new List<float>();
             DataDescription = new List<string>();
             IsConnected = false;
@@ -88,27 +85,12 @@ namespace ConsoleSerialPort
         {
             Enabled = true;
             
-            var listData = new List<string>(dataCapacity);
-            var listDiamX = new List<string>(dataCapacity);
-            var listDiamY = new List<string>(dataCapacity);
-            
             try
             {
-                while (Enabled)
-                {
-                    for (int i = 0; i < listData.Capacity; i++)
-                    {
-                        Console.WriteLine(i);
-                        //_gpioOrange.Write(_serial_swich, PinValue.High);
-                        _serial485ToTTL.Write(SentMessage.CreateMessage(), 0, 8);
-                        //_gpioOrange.Write(_serial_swich, PinValue.Low);
-                        listData.Add(ReadReponse());
-                        Console.WriteLine(listData[i]);
-                        await Task.Delay(_delayMS);
-                        if (token.IsCancellationRequested) break;
-                    }
-                    SendData(listDiamX, listDiamY);
-                }
+                //_gpioOrange.Write(_serial_swich, PinValue.High);
+                _serial485ToTTL.Write(SentMessage.CreateMessage(), 0, 8);
+                //_gpioOrange.Write(_serial_swich, PinValue.Low);
+                ReadReponse();
             }
 
             catch (Exception ex)
