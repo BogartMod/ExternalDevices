@@ -30,7 +30,7 @@ namespace ConsoleSerialPort
             LineName = ConfigurationManager.AppSettings.Get("LineName");
             DataCapacity = Int32.Parse(ConfigurationManager.AppSettings.Get("DataCapacityStack"));
             Data = new List<DataPackage>(DataCapacity);
-        }ы
+        }
 
         public async Task SaveToFileAsync()
         {
