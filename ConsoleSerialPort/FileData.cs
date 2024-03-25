@@ -41,7 +41,6 @@ namespace ConsoleSerialPort
                     var options = new JsonSerializerOptions
                     {
                         WriteIndented = true,
-                        //DefaultIgnoreCondition = JsonIgnoreCondition.Always,
                         IgnoreReadOnlyProperties = false,
 
                     };

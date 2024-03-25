@@ -95,12 +95,8 @@ namespace ConsoleSerialPort
                         for (int i = 0; i < fileData.DataCapacity; i++)
                         {
                             string[] dataXY = izmDiam.GetData().Split(' ');
-                            //fileData.ListDiamX.Add(dataXY[0]);
-                            //fileData.ListDiamY.Add(dataXY[1]);
-                            //fileData.ListDateTimeData.Add(DateTime.Now);
 
                             fileData.Data.Add(new FileData.DataPackage());
-
                             fileData.Data[i].DiamX = dataXY[0];
                             fileData.Data[i].DiamY = dataXY[1];
                             fileData.Data[i].CurrentTime = DateTime.Now;
