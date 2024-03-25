@@ -45,7 +45,7 @@ namespace ConsoleSerialPort
 
                     };
                     await JsonSerializer.SerializeAsync<FileData>(fs, this);
-                    Console.WriteLine("Data has been saved to file");
+                    Console.WriteLine("Данные сохранены в файл.");
                 }
                 catch (Exception ex )
                 { Console.WriteLine(ex.ToString()); }

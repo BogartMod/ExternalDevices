@@ -16,8 +16,9 @@ namespace ConsoleSerialPort
     {
         static void Main(string[] args)
         {
-            CancellationTokenSource cancelTokenSource = new CancellationTokenSource();
-            CancellationToken token = cancelTokenSource.Token;
+            //CancellationTokenSource cancelTokenSource;
+            //CancellationToken token = cancelTokenSource.Token;
+
 
             var appSettings = ConfigurationManager.AppSettings;
 
@@ -70,12 +71,12 @@ namespace ConsoleSerialPort
                 Console.WriteLine("Подключаем.");
                 izmDiam.Connect();
                 Console.WriteLine("Подключились. Начинаем записывать");
+                izmDiam.IsEnabled = true;
                 WorkAsync();
                 
             }
             async Task StopAsync()
             {
-                cancelTokenSource.Cancel();
                 Console.WriteLine("Остановка");
                 izmDiam.Stop();
                 izmDiam.Disconnect();
@@ -90,7 +91,7 @@ namespace ConsoleSerialPort
                 try
                 {
                     var fileData = new FileData();
-                    while (!token.IsCancellationRequested)
+                    while (izmDiam.IsEnabled)
                     {
                         for (int i = 0; i < fileData.DataCapacity; i++)
                         {
@@ -100,12 +101,10 @@ namespace ConsoleSerialPort
                             fileData.Data[i].DiamX = dataXY[0];
                             fileData.Data[i].DiamY = dataXY[1];
                             fileData.Data[i].CurrentTime = DateTime.Now;
-
-                            Console.WriteLine(dataXY[0] + " " + dataXY[1]);
                             await Task.Delay(_delayMS);
 
                         }
-                        cancelTokenSource.Cancel();
+                        izmDiam.Stop(); //todo:test
                         fileData.SaveToFileAsync();
                     }
                 }
@@ -118,7 +117,8 @@ namespace ConsoleSerialPort
 
             void Exit()
             {
-                cancelTokenSource.Dispose();
+                izmDiam.Stop();
+                izmDiam.Disconnect();
                 Environment.Exit(0);
             }
 

@@ -53,9 +53,18 @@ namespace ConsoleSerialPort
 
         public override bool Connect()
         {
-            //_gpioOrange = new GpioOrange(_serial_swich);
-            _serial485ToTTL = SerialConnect(SerialPort, SerialPortSpeed);
-            IsConnected = true;
+            try
+            {
+                //_gpioOrange = new GpioOrange(_serial_swich);
+                if ((_serial485ToTTL == null) || (!_serial485ToTTL.IsOpen))
+                    _serial485ToTTL = SerialConnect(SerialPort, SerialPortSpeed);
+                IsConnected = true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            
 
             return true; 
             throw new NotImplementedException();
