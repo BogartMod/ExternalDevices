@@ -37,7 +37,7 @@ namespace ConsoleSerialPort
     {
         private int _serial_swich; // пин управления переключением 485
         
-        //private GpioOrange? _gpioOrange;
+        private GpioOrange? _gpioOrange;
         private SerialPort? _serial485ToTTL;
 
         public IzmDiam(string serialPort, int serialSpeed = 9600)
@@ -49,13 +49,16 @@ namespace ConsoleSerialPort
             SerialPortSpeed = serialSpeed;
             IsConnected = false;
             IsEnabled = false;
+
+            
         }
 
         public override bool Connect()
         {
             try
             {
-                //_gpioOrange = new GpioOrange(_serial_swich);
+                _gpioOrange = new GpioOrange(_serial_swich);
+                _gpioOrange.OpenPin(_serial_swich);
                 if ((_serial485ToTTL == null) || (!_serial485ToTTL.IsOpen))
                     _serial485ToTTL = SerialConnect(SerialPort, SerialPortSpeed);
                 IsConnected = true;
@@ -74,11 +77,11 @@ namespace ConsoleSerialPort
         {
             if (IsConnected)
             {
-                //_gpioOrange?.ClosePin(_serial_swich);
-                //_gpioOrange?.Disconnect();
+                _gpioOrange?.ClosePin(_serial_swich);
+                _gpioOrange?.Disconnect();
                 _serial485ToTTL?.Close();
 
-                //_gpioOrange = null;
+                _gpioOrange = null;
                 _serial485ToTTL = null;
                 IsConnected = false;
             }
@@ -91,9 +94,9 @@ namespace ConsoleSerialPort
             
             try
             {
-                //_gpioOrange.Write(_serial_swich, PinValue.High);
+                _gpioOrange.Write(_serial_swich, PinValue.High);
                 _serial485ToTTL.Write(SentMessage.CreateMessage(), 0, 8);
-                //_gpioOrange.Write(_serial_swich, PinValue.Low);
+                _gpioOrange.Write(_serial_swich, PinValue.Low);
                 var byteBuffer = this.ReadData();
                 //CheckResponse(byteBuffer);
                 int withX = byteBuffer[3] << 8 | byteBuffer[4];
@@ -207,5 +210,32 @@ namespace ConsoleSerialPort
 
         }
 
+    }
+
+    class Encoder:ExternalDevice
+    {
+
+        public override bool Connect()
+        {
+            return true;
+            throw new NotImplementedException();
+        }
+
+        public override void Disconnect()
+        {
+            return;
+            throw new NotImplementedException();
+        }
+
+        public override string GetData()
+        {
+            
+            throw new NotImplementedException();
+        }
+
+        public override void Stop()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

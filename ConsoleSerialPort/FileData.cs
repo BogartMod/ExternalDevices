@@ -18,7 +18,7 @@ namespace ConsoleSerialPort
             public string DiamY { get; set; }
             public string CurrentDistance { get; set; }
             public string CurrentSpeed { get; set; }
-            public DateTime CurrentTime { get; set; }
+            public string CurrentTime { get; set; }
         } 
 
         public string LineName { get; set; }
@@ -34,10 +34,17 @@ namespace ConsoleSerialPort
 
         public async Task SaveToFileAsync()
         {
-            using (FileStream fs = new FileStream("user.json", FileMode.OpenOrCreate))
+#if DEBUG
+            Console.WriteLine("записываем");
+#endif
+            try
             {
-                try
-                {
+                using (FileStream fs = new FileStream( DateTime.Now.ToString("yy-MM-dd-hh") + ".json", FileMode.OpenOrCreate))
+            {
+#if DEBUG
+                Console.WriteLine("filestream");
+#endif
+
                     var options = new JsonSerializerOptions
                     {
                         WriteIndented = true,
@@ -47,10 +54,13 @@ namespace ConsoleSerialPort
                     await JsonSerializer.SerializeAsync<FileData>(fs, this);
                     Console.WriteLine("Данные сохранены в файл.");
                 }
-                catch (Exception ex )
-                { Console.WriteLine(ex.ToString()); }
                 
             }
+            catch (Exception ex)
+            { Console.WriteLine(ex.ToString()); }
+#if DEBUG
+            Console.WriteLine("записали");
+#endif
         }
     }
 }

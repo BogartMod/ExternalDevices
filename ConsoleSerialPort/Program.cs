@@ -24,19 +24,19 @@ namespace ConsoleSerialPort
 
             Task IzmWorkTask = null;
 
-            //var izmDiam = new IzmDiam(
-            //    serialPort: ConfigurationManager.AppSettings.Get("IzmDiamPort"),
-            //    serialSpeed: Int32.Parse(ConfigurationManager.AppSettings.Get("IzmDiamSpeed")) );
             var izmDiam = new IzmDiam(
-                serialPort: "COM13",
-                serialSpeed: Int32.Parse(
-                    ConfigurationManager.AppSettings.Get("IzmDiamSpeed"))
-                );
+                serialPort: ConfigurationManager.AppSettings.Get("IzmDiamPort"),
+                serialSpeed: Int32.Parse(ConfigurationManager.AppSettings.Get("IzmDiamSpeed")) );
+            //var izmDiam = new IzmDiam(
+            //    serialPort: "COM13",
+            //    serialSpeed: Int32.Parse(
+            //        ConfigurationManager.AppSettings.Get("IzmDiamSpeed"))
+            //    );
 
             while (true)
             {
 
-
+                Console.WriteLine("Ожидание комманды.");
                 string cons = Console.ReadLine();
 
                 switch (cons)
@@ -100,7 +100,12 @@ namespace ConsoleSerialPort
                             fileData.Data.Add(new FileData.DataPackage());
                             fileData.Data[i].DiamX = dataXY[0];
                             fileData.Data[i].DiamY = dataXY[1];
-                            fileData.Data[i].CurrentTime = DateTime.Now;
+                            fileData.Data[i].CurrentTime = DateTime.Now.ToString("O");
+
+#if DEBUG
+                            Console.WriteLine(dataXY[0]);
+#endif
+
                             await Task.Delay(_delayMS);
 
                         }
