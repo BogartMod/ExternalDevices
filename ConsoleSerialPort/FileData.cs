@@ -16,7 +16,7 @@ namespace ConsoleSerialPort
         {
             public string DiamX {  get; set; }
             public string DiamY { get; set; }
-            public string CurrentDistance { get; set; }
+            public int CurrentDistance { get; set; } = 0;
             public string CurrentSpeed { get; set; }
             public string CurrentTime { get; set; }
         } 
@@ -30,20 +30,21 @@ namespace ConsoleSerialPort
             LineName = ConfigurationManager.AppSettings.Get("LineName");
             DataCapacity = Int32.Parse(ConfigurationManager.AppSettings.Get("DataCapacityStack"));
             Data = new List<DataPackage>(DataCapacity);
+            
         }
 
         public async Task SaveToFileAsync()
         {
-#if DEBUG
-            Console.WriteLine("записываем");
-#endif
+//#if DEBUG
+//            Console.WriteLine("записываем");
+//#endif
             try
             {
-                using (FileStream fs = new FileStream( DateTime.Now.ToString("yy-MM-dd-hh") + ".json", FileMode.OpenOrCreate))
+                using (FileStream fs = new FileStream( DateTime.Now.ToString("yy-MM-dd-hh") + ".json", FileMode.Append))
             {
-#if DEBUG
-                Console.WriteLine("filestream");
-#endif
+//#if DEBUG
+//                Console.WriteLine("filestream");
+//#endif
 
                     var options = new JsonSerializerOptions
                     {
@@ -58,9 +59,9 @@ namespace ConsoleSerialPort
             }
             catch (Exception ex)
             { Console.WriteLine(ex.ToString()); }
-#if DEBUG
-            Console.WriteLine("записали");
-#endif
+//#if DEBUG
+//            Console.WriteLine("записали");
+//#endif
         }
     }
 }

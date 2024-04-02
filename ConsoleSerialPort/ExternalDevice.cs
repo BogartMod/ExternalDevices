@@ -37,7 +37,7 @@ namespace ConsoleSerialPort
     {
         private int _serial_swich; // пин управления переключением 485
         
-        private GpioOrange? _gpioOrange;
+        //private GpioOrange? _gpioOrange;
         private SerialPort? _serial485ToTTL;
 
         public IzmDiam(string serialPort, int serialSpeed = 9600)
@@ -49,16 +49,14 @@ namespace ConsoleSerialPort
             SerialPortSpeed = serialSpeed;
             IsConnected = false;
             IsEnabled = false;
-
-            
         }
 
         public override bool Connect()
         {
             try
             {
-                _gpioOrange = new GpioOrange(_serial_swich);
-                _gpioOrange.OpenPin(_serial_swich);
+                //_gpioOrange = new GpioOrange(_serial_swich);
+                //_gpioOrange.OpenPin(_serial_swich);
                 if ((_serial485ToTTL == null) || (!_serial485ToTTL.IsOpen))
                     _serial485ToTTL = SerialConnect(SerialPort, SerialPortSpeed);
                 IsConnected = true;
@@ -77,11 +75,11 @@ namespace ConsoleSerialPort
         {
             if (IsConnected)
             {
-                _gpioOrange?.ClosePin(_serial_swich);
-                _gpioOrange?.Disconnect();
+                //_gpioOrange?.ClosePin(_serial_swich);
+                //_gpioOrange?.Disconnect();
                 _serial485ToTTL?.Close();
 
-                _gpioOrange = null;
+                //_gpioOrange = null;
                 _serial485ToTTL = null;
                 IsConnected = false;
             }
@@ -94,9 +92,9 @@ namespace ConsoleSerialPort
             
             try
             {
-                _gpioOrange.Write(_serial_swich, PinValue.High);
+                //_gpioOrange.Write(_serial_swich, PinValue.High);
                 _serial485ToTTL.Write(SentMessage.CreateMessage(), 0, 8);
-                _gpioOrange.Write(_serial_swich, PinValue.Low);
+                //_gpioOrange.Write(_serial_swich, PinValue.Low);
                 var byteBuffer = this.ReadData();
                 //CheckResponse(byteBuffer);
                 int withX = byteBuffer[3] << 8 | byteBuffer[4];
@@ -119,7 +117,7 @@ namespace ConsoleSerialPort
             
         }
 
-        public byte[] ReadData()
+        private byte[] ReadData()
         {
             int offset = 0;
             var byteBuffer = new byte[13];
@@ -156,7 +154,7 @@ namespace ConsoleSerialPort
 
         }
 
-        public static class SentMessage
+        private static class SentMessage
         {
 
             public static byte[] CreateMessage()
@@ -214,6 +212,24 @@ namespace ConsoleSerialPort
 
     class Encoder:ExternalDevice
     {
+        private GpioOrange? _gpioOrange;
+        int countMeashurements;
+        int _pinA;
+        int _encoderResolution;
+        int _encoderLengthRoll;
+
+        public Encoder()
+        {
+
+            countMeashurements = Int32.Parse(ConfigurationManager.AppSettings.Get("EncoderNumberOfMeasurements"));
+            _pinA = Int32.Parse(ConfigurationManager.AppSettings.Get("EncoderPortA"));
+            _gpioOrange = new GpioOrange(_pinA);
+            _gpioOrange.OpenPin(_pinA);
+            _gpioOrange.SetPinMode(_pinA, PinMode.Input);
+
+            _encoderResolution = Int32.Parse(ConfigurationManager.AppSettings.Get("EncoderResolution"));
+            _encoderLengthRoll = Int32.Parse(ConfigurationManager.AppSettings.Get("EncoderLengthRoll"));
+        }
 
         public override bool Connect()
         {
@@ -229,7 +245,26 @@ namespace ConsoleSerialPort
 
         public override string GetData()
         {
-            
+            List<DateTime> meashurements = new List<DateTime>();
+            DateTime dateTimeStart = DateTime.Now;
+            PinValue PinValuePrevious = false;
+            PinValue pinValueCurrent = false;
+            int count = 0;
+            int length;
+            int speed;
+            while (DateTime.Now < dateTimeStart.AddSeconds(1))
+            {
+                pinValueCurrent = _gpioOrange.Read(_pinA);
+                if (pinValueCurrent!= PinValuePrevious)
+                {
+                    PinValuePrevious = pinValueCurrent;
+                    count++;
+                }
+            }
+            length = _encoderLengthRoll*count/_encoderResolution;
+            speed = length * 60;
+
+            return length.ToString() + " " + speed.ToString();
             throw new NotImplementedException();
         }
 
@@ -238,4 +273,6 @@ namespace ConsoleSerialPort
             throw new NotImplementedException();
         }
     }
+
+
 }

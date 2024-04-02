@@ -30,8 +30,9 @@ namespace ConsoleSerialPort
             //var izmDiam = new IzmDiam(
             //    serialPort: "COM13",
             //    serialSpeed: Int32.Parse(
-            //        ConfigurationManager.AppSettings.Get("IzmDiamSpeed"))
-            //    );
+            //        ConfigurationManager.AppSettings.Get("IzmDiamSpeed")) );
+
+            var encoder = new Encoder();
 
             while (true)
             {
@@ -87,7 +88,7 @@ namespace ConsoleSerialPort
             async Task WorkAsync()
             {
                 int _delayMS = Int32.Parse(ConfigurationManager.AppSettings.Get("ReadDelayMS"));
-                
+                int currentLength = 0;
                 try
                 {
                     var fileData = new FileData();
@@ -102,8 +103,16 @@ namespace ConsoleSerialPort
                             fileData.Data[i].DiamY = dataXY[1];
                             fileData.Data[i].CurrentTime = DateTime.Now.ToString("O");
 
+                            string[] dataEncoder = encoder.GetData().Split(' ');
+                            currentLength += Int32.Parse(dataEncoder[0]);
+                            fileData.Data[i].CurrentDistance = currentLength;
+                            fileData.Data[i].CurrentSpeed = dataEncoder[1];
+
+
 #if DEBUG
                             Console.WriteLine(dataXY[0]);
+                            Console.WriteLine(currentLength);
+                            Console.WriteLine(dataEncoder[1]);
 #endif
 
                             await Task.Delay(_delayMS);
@@ -119,6 +128,10 @@ namespace ConsoleSerialPort
                     Console.WriteLine(ex.Message);
                 }
             }
+            async Task WaitPressButtonAsync()
+            {
+
+            }
 
             void Exit()
             {
@@ -128,13 +141,6 @@ namespace ConsoleSerialPort
             }
 
         }
-
-        public async Task SaveDataAsync(IzmDiam izmDiam)
-        {
-
-        }
-
-        
 
     }
 
