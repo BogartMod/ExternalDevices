@@ -22,7 +22,7 @@ namespace ConsoleSerialPort
 
             var appSettings = ConfigurationManager.AppSettings;
 
-            Task IzmWorkTask = null;
+            //Task IzmWorkTask = null;
 
             var izmDiam = new IzmDiam(
                 serialPort: ConfigurationManager.AppSettings.Get("IzmDiamPort"),
@@ -33,6 +33,7 @@ namespace ConsoleSerialPort
             //        ConfigurationManager.AppSettings.Get("IzmDiamSpeed")) );
 
             var encoder = new Encoder();
+            var buttonStartStop = new ButtonStartStop();
 
             while (true)
             {
@@ -54,10 +55,15 @@ namespace ConsoleSerialPort
                         Exit();
                         break;
 
+                    case "options":
+                        Console.WriteLine("пока не реализовано");
+                        break;
+
                     case "help":
                         Console.WriteLine("start - запуск отслеживания");
                         Console.WriteLine("stop - остановка ослеживания");
                         Console.WriteLine("exit - завершить программу");
+                        Console.WriteLine("options - настройки");
                         Console.WriteLine("help - вывод подсказки");
                         break;
 
@@ -74,14 +80,16 @@ namespace ConsoleSerialPort
                 Console.WriteLine("Подключились. Начинаем записывать");
                 izmDiam.IsEnabled = true;
                 WorkAsync();
-                
+                WaitPressButtonAsync();
+
+
             }
             async Task StopAsync()
             {
                 Console.WriteLine("Остановка");
                 izmDiam.Stop();
                 izmDiam.Disconnect();
-                if (IzmWorkTask != null) await IzmWorkTask;
+                //if (IzmWorkTask != null) await IzmWorkTask;
                 Console.WriteLine("Процесс остановлен");
 
             }
@@ -128,9 +136,21 @@ namespace ConsoleSerialPort
                     Console.WriteLine(ex.Message);
                 }
             }
+
             async Task WaitPressButtonAsync()
             {
+                var currentButton = false;
 
+                while (true)
+                {
+                    currentButton = buttonStartStop.GetData() == "true" ? true : false;
+                    if (currentButton)
+                    {
+                        Start();
+                    }
+                    Task.Delay(15);
+                }
+                
             }
 
             void Exit()
@@ -146,32 +166,32 @@ namespace ConsoleSerialPort
 
 
 
-    public class GpioOrange : GpioController
-    {
-        public byte[]? Data { get; set; }
-        int Pin { get; set; }
-        GpioController GpioController { get; set; }
+    //public class GpioOrange : GpioController
+    //{
+    //    public byte[]? Data { get; set; }
+    //    int Pin { get; set; }
+    //    GpioController GpioController { get; set; }
 
-        public GpioOrange()
-        {
-            GpioController = new GpioController();
-            Pin = 0;
-        }
+    //    //public GpioOrange()
+    //    //{
+    //    //    GpioController = new GpioController();
+    //    //    Pin = 0;
+    //    //}
 
-        public GpioOrange(int pin)
-        {
-            Pin = pin;
-            GpioController = new GpioController();
-            GpioController.OpenPin(Pin);
+    //    //public GpioOrange(int pin)
+    //    //{
+    //    //    Pin = pin;
+    //    //    GpioController = new GpioController();
+    //    //    GpioController.OpenPin(Pin);
             
-        }
+    //    //}
 
-        public bool Disconnect()
-        {
-            if (Pin != 0) GpioController.ClosePin(Pin);
-            return true;
-        }
-    }
+    //    public bool Disconnect()
+    //    {
+    //        if (Pin != 0) GpioController.ClosePin(Pin);
+    //        return true;
+    //    }
+    //}
 
     
 }

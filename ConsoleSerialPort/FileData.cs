@@ -59,9 +59,9 @@ namespace ConsoleSerialPort
             }
             catch (Exception ex)
             { Console.WriteLine(ex.ToString()); }
-//#if DEBUG
-//            Console.WriteLine("записали");
-//#endif
+#if DEBUG
+            Console.WriteLine("записали");
+#endif
         }
     }
 }

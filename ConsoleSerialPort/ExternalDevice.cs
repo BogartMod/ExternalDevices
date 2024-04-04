@@ -27,8 +27,6 @@ namespace ConsoleSerialPort
         public abstract void Disconnect();
         public abstract string GetData();
         public abstract void Stop();
-        
-
 
     }
 
@@ -212,7 +210,7 @@ namespace ConsoleSerialPort
 
     class Encoder:ExternalDevice
     {
-        private GpioOrange? _gpioOrange;
+        private GpioController? _gpioOrange;
         int countMeashurements;
         int _pinA;
         int _encoderResolution;
@@ -223,7 +221,7 @@ namespace ConsoleSerialPort
 
             countMeashurements = Int32.Parse(ConfigurationManager.AppSettings.Get("EncoderNumberOfMeasurements"));
             _pinA = Int32.Parse(ConfigurationManager.AppSettings.Get("EncoderPortA"));
-            _gpioOrange = new GpioOrange(_pinA);
+            _gpioOrange = new GpioController();
             _gpioOrange.OpenPin(_pinA);
             _gpioOrange.SetPinMode(_pinA, PinMode.Input);
 
@@ -265,7 +263,49 @@ namespace ConsoleSerialPort
             speed = length * 60;
 
             return length.ToString() + " " + speed.ToString();
+        }
+
+        public override void Stop()
+        {
+    
+        }
+    }
+
+    class ButtonStartStop : ExternalDevice
+    {
+        private GpioController? _gpioOrange;
+        int _pin;
+        private DateTime PreviousPushTime { get; set; }
+        
+        public ButtonStartStop()
+        {
+
+            _pin = Int32.Parse(ConfigurationManager.AppSettings.Get("ButtonStartStopPort"));
+            _gpioOrange = new GpioController();
+            _gpioOrange.OpenPin(_pin);
+            _gpioOrange.SetPinMode(_pin, PinMode.Input);
+        }
+
+        public override bool Connect()
+        {
+            return true;
             throw new NotImplementedException();
+        }
+
+        public override void Disconnect()
+        {
+            return;
+            throw new NotImplementedException();
+        }
+
+        public override string GetData()
+        {
+            bool currentButtonStatus = _gpioOrange.Read(_pin) == PinValue.Low ? false : true;
+            if (currentButtonStatus && (PreviousPushTime <= DateTime.Now.AddMilliseconds(50)))
+            {
+                return "true";
+            }
+            return "false";
         }
 
         public override void Stop()
@@ -273,6 +313,4 @@ namespace ConsoleSerialPort
             throw new NotImplementedException();
         }
     }
-
-
 }
