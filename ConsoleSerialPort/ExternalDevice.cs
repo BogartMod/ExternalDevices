@@ -21,7 +21,7 @@ namespace ConsoleSerialPort
         public string? SerialPort { get; set; }
         public int SerialPortSpeed { get; set; }
         public bool IsConnected { get; set; }
-        public bool IsEnabled { get; set; }
+        //public bool IsEnabled { get; set; }
                 
         public abstract bool Connect();
         public abstract void Disconnect();
@@ -33,7 +33,7 @@ namespace ConsoleSerialPort
 
     class IzmDiam : ExternalDevice
     {
-        private int _serial_swich; // пин управления переключением 485
+        //private int _serial_swich; // пин управления переключением 485
         
         //private GpioOrange? _gpioOrange;
         private SerialPort? _serial485ToTTL;
@@ -42,11 +42,11 @@ namespace ConsoleSerialPort
         {
             Name = ConfigurationManager.AppSettings.Get("IzmDiamName");
             Description = ConfigurationManager.AppSettings.Get("IzmDiamDescription");
-            _serial_swich = Int32.Parse(ConfigurationManager.AppSettings.Get("serial_swich_port"));
+            //_serial_swich = Int32.Parse(ConfigurationManager.AppSettings.Get("serial_swich_port"));
             SerialPort = serialPort;
             SerialPortSpeed = serialSpeed;
             IsConnected = false;
-            IsEnabled = false;
+            //IsEnabled = false;
         }
 
         public override bool Connect()
@@ -56,7 +56,11 @@ namespace ConsoleSerialPort
                 //_gpioOrange = new GpioOrange(_serial_swich);
                 //_gpioOrange.OpenPin(_serial_swich);
                 if ((_serial485ToTTL == null) || (!_serial485ToTTL.IsOpen))
+                {
                     _serial485ToTTL = SerialConnect(SerialPort, SerialPortSpeed);
+                    _serial485ToTTL.ReadTimeout = 100;
+                    _serial485ToTTL.WriteTimeout = 100;
+                }                    
                 IsConnected = true;
             }
             catch (Exception ex)
@@ -86,7 +90,7 @@ namespace ConsoleSerialPort
 
         public override string GetData()
         {
-            IsEnabled = true;
+            //IsEnabled = true;
             
             try
             {
@@ -111,7 +115,7 @@ namespace ConsoleSerialPort
 
         public override void Stop()
         {
-            IsEnabled &= false;
+            //IsEnabled &= false;
             
         }
 
@@ -275,6 +279,9 @@ namespace ConsoleSerialPort
     {
         private GpioController? _gpioOrange;
         int _pin;
+
+        private PinValue previousValue;
+        
         private DateTime PreviousPushTime { get; set; }
         
         public ButtonStartStop()
@@ -284,6 +291,7 @@ namespace ConsoleSerialPort
             _gpioOrange = new GpioController();
             _gpioOrange.OpenPin(_pin);
             _gpioOrange.SetPinMode(_pin, PinMode.Input);
+            PreviousPushTime = DateTime.Now;
         }
 
         public override bool Connect()
@@ -300,9 +308,11 @@ namespace ConsoleSerialPort
 
         public override string GetData()
         {
-            bool currentButtonStatus = _gpioOrange.Read(_pin) == PinValue.Low ? false : true;
-            if (currentButtonStatus && (PreviousPushTime <= DateTime.Now.AddMilliseconds(50)))
+            bool currentButtonStatus = _gpioOrange.Read(_pin) == PinValue.Low ? true : false;
+
+            if (currentButtonStatus && (PreviousPushTime < DateTime.Now.AddMilliseconds(-300)))
             {
+                PreviousPushTime = DateTime.Now;
                 return "true";
             }
             return "false";

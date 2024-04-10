@@ -18,7 +18,7 @@ namespace ConsoleSerialPort
         {
             //CancellationTokenSource cancelTokenSource;
             //CancellationToken token = cancelTokenSource.Token;
-
+            bool isEnabled = false;
 
             var appSettings = ConfigurationManager.AppSettings;
 
@@ -34,7 +34,7 @@ namespace ConsoleSerialPort
 
             var encoder = new Encoder();
             var buttonStartStop = new ButtonStartStop();
-
+            WaitPressButtonAsync();
             while (true)
             {
 
@@ -48,7 +48,7 @@ namespace ConsoleSerialPort
                         break;
 
                     case "stop":
-                        StopAsync();
+                        Stop();
                         break;
 
                     case "exit":
@@ -71,27 +71,27 @@ namespace ConsoleSerialPort
                         Console.WriteLine("Неизвестная комманда. Список комманд: help");
                         break;
                 }
-            }
+            } 
 
             void Start()
             {
-                Console.WriteLine("Подключаем.");
                 izmDiam.Connect();
                 Console.WriteLine("Подключились. Начинаем записывать");
-                izmDiam.IsEnabled = true;
+                //izmDiam.IsEnabled = true;
+                isEnabled = true;
                 WorkAsync();
-                WaitPressButtonAsync();
+
 
 
             }
-            async Task StopAsync()
+            void Stop()
             {
-                Console.WriteLine("Остановка");
+                isEnabled = false;
                 izmDiam.Stop();
                 izmDiam.Disconnect();
                 //if (IzmWorkTask != null) await IzmWorkTask;
-                Console.WriteLine("Процесс остановлен");
-
+                Console.WriteLine("Останавливаем");
+                
             }
             async Task WorkAsync()
             {
@@ -100,9 +100,9 @@ namespace ConsoleSerialPort
                 try
                 {
                     var fileData = new FileData();
-                    while (izmDiam.IsEnabled)
+                    while (isEnabled)
                     {
-                        for (int i = 0; i < fileData.DataCapacity; i++)
+                        for (int i = 0; (i < fileData.DataCapacity)&&isEnabled; i++)
                         {
                             string[] dataXY = izmDiam.GetData().Split(' ');
 
@@ -120,13 +120,13 @@ namespace ConsoleSerialPort
 #if DEBUG
                             Console.WriteLine(dataXY[0]);
                             Console.WriteLine(currentLength);
-                            Console.WriteLine(dataEncoder[1]);
 #endif
 
                             await Task.Delay(_delayMS);
 
                         }
                         izmDiam.Stop(); //todo:test
+                        isEnabled = false;
                         fileData.SaveToFileAsync();
                     }
                 }
@@ -146,9 +146,23 @@ namespace ConsoleSerialPort
                     currentButton = buttonStartStop.GetData() == "true" ? true : false;
                     if (currentButton)
                     {
-                        Start();
+                        if (!isEnabled)
+                        {
+                            Start();
+#if DEBUG
+                            Console.WriteLine("buttonStart");
+#endif
+                        }
+                        else
+                        {
+#if DEBUG
+                            Console.WriteLine("buttonSTOP");
+#endif
+                            Stop();
+                        }
                     }
-                    Task.Delay(15);
+                    currentButton = false;
+                    await Task.Delay(50);
                 }
                 
             }
@@ -163,35 +177,6 @@ namespace ConsoleSerialPort
         }
 
     }
-
-
-
-    //public class GpioOrange : GpioController
-    //{
-    //    public byte[]? Data { get; set; }
-    //    int Pin { get; set; }
-    //    GpioController GpioController { get; set; }
-
-    //    //public GpioOrange()
-    //    //{
-    //    //    GpioController = new GpioController();
-    //    //    Pin = 0;
-    //    //}
-
-    //    //public GpioOrange(int pin)
-    //    //{
-    //    //    Pin = pin;
-    //    //    GpioController = new GpioController();
-    //    //    GpioController.OpenPin(Pin);
-            
-    //    //}
-
-    //    public bool Disconnect()
-    //    {
-    //        if (Pin != 0) GpioController.ClosePin(Pin);
-    //        return true;
-    //    }
-    //}
-
     
 }
+
