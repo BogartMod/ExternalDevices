@@ -12,9 +12,7 @@ namespace ConsoleSerialPort
     {
         private static GpioController? _gpioOrange;
         static List<int> _ledsPin;
-        static int _pinR;
-        static int _pinY;
-        static int _pinG;
+        static bool isBlink = false;
 
         static LED()
         {
@@ -22,6 +20,7 @@ namespace ConsoleSerialPort
             _ledsPin.Add(Int32.Parse(ConfigurationManager.AppSettings.Get("LedGreen")));
             _ledsPin.Add(Int32.Parse(ConfigurationManager.AppSettings.Get("LedYellow")));
             _ledsPin.Add(Int32.Parse(ConfigurationManager.AppSettings.Get("LedRed")));
+
             
             _gpioOrange = new GpioController();
             foreach (int pin in _ledsPin)
@@ -30,6 +29,7 @@ namespace ConsoleSerialPort
         }
         public static void AllOn()
         {
+            AllOff();
             foreach (int pin in _ledsPin)
             {
                 _gpioOrange.Write(pin, PinValue.High);
@@ -41,6 +41,7 @@ namespace ConsoleSerialPort
             {
                 _gpioOrange.Write(pin, PinValue.Low);
             }
+            isBlink = false;
         }
         public static void On(LedColor color)
         {
@@ -50,6 +51,22 @@ namespace ConsoleSerialPort
         public static void Off(LedColor color)
         {
 
+        }
+
+        public static async Task BlinkAsync(LedColor color)
+        {
+            isBlink = true;
+
+            while (isBlink)
+            {
+                _gpioOrange.Write(_ledsPin[(int)color], PinValue.High);
+                await Task.Delay(1000);
+                foreach (int pin in _ledsPin)
+                {
+                    _gpioOrange.Write(pin, PinValue.Low);
+                }
+                await Task.Delay(1000);
+            }
         }
     }
 

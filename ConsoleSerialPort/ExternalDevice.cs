@@ -26,7 +26,6 @@ namespace ConsoleSerialPort
         public abstract bool Connect();
         public abstract void Disconnect();
         public abstract string GetData();
-        public abstract void Stop();
 
     }
 
@@ -66,6 +65,7 @@ namespace ConsoleSerialPort
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
+                LED.On(LedColor.Red);
             }
             
 
@@ -107,17 +107,13 @@ namespace ConsoleSerialPort
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
+                LED.On(LedColor.Red);
                 return ex.Message;
             }
             
             
         }
 
-        public override void Stop()
-        {
-            //IsEnabled &= false;
-            
-        }
 
         private byte[] ReadData()
         {
@@ -133,6 +129,7 @@ namespace ConsoleSerialPort
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
+                LED.On(LedColor.Red);
             }
             return byteBuffer;
         }
@@ -268,10 +265,6 @@ namespace ConsoleSerialPort
             return length.ToString() + " " + speed.ToString();
         }
 
-        public override void Stop()
-        {
-    
-        }
     }
 
     class ButtonStartStop : ExternalDevice
@@ -315,11 +308,6 @@ namespace ConsoleSerialPort
                 return "true";
             }
             return "false";
-        }
-
-        public override void Stop()
-        {
-            throw new NotImplementedException();
         }
     }
 }
