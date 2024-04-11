@@ -226,8 +226,7 @@ namespace ConsoleSerialPort
             countMeashurements = Int32.Parse(ConfigurationManager.AppSettings.Get("EncoderNumberOfMeasurements"));
             _pinA = Int32.Parse(ConfigurationManager.AppSettings.Get("EncoderPortA"));
             _gpioOrange = new GpioController();
-            _gpioOrange.OpenPin(_pinA);
-            _gpioOrange.SetPinMode(_pinA, PinMode.Input);
+            _gpioOrange.OpenPin(_pinA, PinMode.Input);
 
             _encoderResolution = Int32.Parse(ConfigurationManager.AppSettings.Get("EncoderResolution"));
             _encoderLengthRoll = Int32.Parse(ConfigurationManager.AppSettings.Get("EncoderLengthRoll"));

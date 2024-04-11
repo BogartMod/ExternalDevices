@@ -35,16 +35,10 @@ namespace ConsoleSerialPort
 
         public async Task SaveToFileAsync()
         {
-//#if DEBUG
-//            Console.WriteLine("записываем");
-//#endif
             try
             {
                 using (FileStream fs = new FileStream( DateTime.Now.ToString("yy-MM-dd-hh") + ".json", FileMode.Append))
-            {
-//#if DEBUG
-//                Console.WriteLine("filestream");
-//#endif
+                {
 
                     var options = new JsonSerializerOptions
                     {
@@ -58,7 +52,10 @@ namespace ConsoleSerialPort
                 
             }
             catch (Exception ex)
-            { Console.WriteLine(ex.ToString()); }
+            { 
+                Console.WriteLine(ex.ToString());
+                LED.On(LedColor.Red);
+            }
 #if DEBUG
             Console.WriteLine("записали");
 #endif

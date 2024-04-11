@@ -19,6 +19,7 @@ namespace ConsoleSerialPort
             //CancellationTokenSource cancelTokenSource;
             //CancellationToken token = cancelTokenSource.Token;
             bool isEnabled = false;
+            LED.AllOn();
 
             var appSettings = ConfigurationManager.AppSettings;
 
@@ -35,11 +36,13 @@ namespace ConsoleSerialPort
             var encoder = new Encoder();
             var buttonStartStop = new ButtonStartStop();
             WaitPressButtonAsync();
+
             while (true)
             {
 
                 Console.WriteLine("Ожидание комманды.");
                 string cons = Console.ReadLine();
+                
 
                 switch (cons)
                 {
@@ -67,6 +70,22 @@ namespace ConsoleSerialPort
                         Console.WriteLine("help - вывод подсказки");
                         break;
 
+                    case "LedOn":
+                        LED.AllOn();
+                        break;
+                    case "LedOff":
+                        LED.AllOff();
+                        break;
+                    case "LedGreen":
+                        LED.On(LedColor.Green);
+                        break;
+                    case "LedYellow":
+                        LED.On(LedColor.Yellow);
+                        break;
+                    case "LedRed":
+                        LED.On(LedColor.Red);
+                        break;
+
                     default:
                         Console.WriteLine("Неизвестная комманда. Список комманд: help");
                         break;
@@ -77,6 +96,7 @@ namespace ConsoleSerialPort
             {
                 izmDiam.Connect();
                 Console.WriteLine("Подключились. Начинаем записывать");
+                LED.On(LedColor.Green);
                 //izmDiam.IsEnabled = true;
                 isEnabled = true;
                 WorkAsync();
@@ -89,6 +109,7 @@ namespace ConsoleSerialPort
                 isEnabled = false;
                 izmDiam.Stop();
                 izmDiam.Disconnect();
+                LED.AllOff();
                 //if (IzmWorkTask != null) await IzmWorkTask;
                 Console.WriteLine("Останавливаем");
                 
@@ -134,6 +155,7 @@ namespace ConsoleSerialPort
                 catch (Exception ex)
                 {
                     Console.WriteLine(ex.Message);
+                    LED.On(LedColor.Red);
                 }
             }
 
@@ -171,6 +193,7 @@ namespace ConsoleSerialPort
             {
                 izmDiam.Stop();
                 izmDiam.Disconnect();
+                LED.AllOff();
                 Environment.Exit(0);
             }
 
