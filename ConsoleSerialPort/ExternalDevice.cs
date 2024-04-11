@@ -66,6 +66,7 @@ namespace ConsoleSerialPort
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
+                LED.On(LedColor.Red);
             }
             
 
@@ -107,6 +108,7 @@ namespace ConsoleSerialPort
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
+                LED.On(LedColor.Red);
                 return ex.Message;
             }
             
@@ -133,6 +135,7 @@ namespace ConsoleSerialPort
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
+                LED.On(LedColor.Red);
             }
             return byteBuffer;
         }

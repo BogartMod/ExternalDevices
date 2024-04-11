@@ -36,7 +36,7 @@ namespace ConsoleSerialPort
             var encoder = new Encoder();
             var buttonStartStop = new ButtonStartStop();
             WaitPressButtonAsync();
-
+            LED.BlinkAsync(LedColor.Green);
             while (true)
             {
 
@@ -97,11 +97,8 @@ namespace ConsoleSerialPort
                 izmDiam.Connect();
                 Console.WriteLine("Подключились. Начинаем записывать");
                 LED.On(LedColor.Green);
-                //izmDiam.IsEnabled = true;
                 isEnabled = true;
                 WorkAsync();
-
-
 
             }
             void Stop()
@@ -109,11 +106,12 @@ namespace ConsoleSerialPort
                 isEnabled = false;
                 izmDiam.Stop();
                 izmDiam.Disconnect();
-                LED.AllOff();
+                LED.BlinkAsync(LedColor.Green);
                 //if (IzmWorkTask != null) await IzmWorkTask;
                 Console.WriteLine("Останавливаем");
                 
             }
+
             async Task WorkAsync()
             {
                 int _delayMS = Int32.Parse(ConfigurationManager.AppSettings.Get("ReadDelayMS"));
@@ -146,8 +144,8 @@ namespace ConsoleSerialPort
                             await Task.Delay(_delayMS);
 
                         }
-                        izmDiam.Stop(); //todo:test
-                        isEnabled = false;
+                        //izmDiam.Stop(); //todo:test
+                        
                         fileData.SaveToFileAsync();
                     }
                 }
