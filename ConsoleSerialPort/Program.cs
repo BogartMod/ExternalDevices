@@ -159,12 +159,12 @@ namespace ConsoleSerialPort
 
             async Task WaitPressButtonAsync()
             {
-                var currentButton = false;
+                var currentButtonStat = false;
 
                 while (true)
                 {
-                    currentButton = buttonStartStop.GetData() == "true" ? true : false;
-                    if (currentButton)
+                    currentButtonStat = buttonStartStop.GetData() == "true" ? true : false;
+                    if (currentButtonStat)
                     {
                         if (!isEnabled)
                         {
@@ -181,7 +181,7 @@ namespace ConsoleSerialPort
                             Stop();
                         }
                     }
-                    currentButton = false;
+                    currentButtonStat = false;
                     await Task.Delay(50);
                 }
                 

@@ -267,47 +267,47 @@ namespace ConsoleSerialPort
 
     }
 
-    class ButtonStartStop : ExternalDevice
-    {
-        private GpioController? _gpioOrange;
-        int _pin;
+    //class ButtonStartStop : ExternalDevice
+    //{
+    //    private GpioController? _gpioOrange;
+    //    int _pin;
 
-        private PinValue previousValue;
+    //    private PinValue previousValue;
         
-        private DateTime PreviousPushTime { get; set; }
+    //    private DateTime PreviousPushTime { get; set; }
         
-        public ButtonStartStop()
-        {
+    //    public ButtonStartStop()
+    //    {
 
-            _pin = Int32.Parse(ConfigurationManager.AppSettings.Get("ButtonStartStopPort"));
-            _gpioOrange = new GpioController();
-            _gpioOrange.OpenPin(_pin);
-            _gpioOrange.SetPinMode(_pin, PinMode.Input);
-            PreviousPushTime = DateTime.Now;
-        }
+    //        _pin = Int32.Parse(ConfigurationManager.AppSettings.Get("ButtonStartStopPort"));
+    //        _gpioOrange = new GpioController();
+    //        _gpioOrange.OpenPin(_pin);
+    //        _gpioOrange.SetPinMode(_pin, PinMode.Input);
+    //        PreviousPushTime = DateTime.Now;
+    //    }
 
-        public override bool Connect()
-        {
-            return true;
-            throw new NotImplementedException();
-        }
+    //    public override bool Connect()
+    //    {
+    //        return true;
+    //        throw new NotImplementedException();
+    //    }
 
-        public override void Disconnect()
-        {
-            return;
-            throw new NotImplementedException();
-        }
+    //    public override void Disconnect()
+    //    {
+    //        return;
+    //        throw new NotImplementedException();
+    //    }
 
-        public override string GetData()
-        {
-            bool currentButtonStatus = _gpioOrange.Read(_pin) == PinValue.Low ? true : false;
+    //    public override string GetData()
+    //    {
+    //        bool currentButtonStatus = _gpioOrange.Read(_pin) == PinValue.Low ? true : false;
 
-            if (currentButtonStatus && (PreviousPushTime < DateTime.Now.AddMilliseconds(-300)))
-            {
-                PreviousPushTime = DateTime.Now;
-                return "true";
-            }
-            return "false";
-        }
-    }
+    //        if (currentButtonStatus && (PreviousPushTime < DateTime.Now.AddMilliseconds(-300)))
+    //        {
+    //            PreviousPushTime = DateTime.Now;
+    //            return "true";
+    //        }
+    //        return "false";
+    //    }
+    //}
 }
