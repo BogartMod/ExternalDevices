@@ -20,7 +20,7 @@ namespace ConsoleSerialPort
         public ButtonStartStop()
         {
 
-            _pin = Int32.Parse(ConfigurationManager.AppSettings.Get("ButtonStartStopPort")!);
+            _pin = Int32.Parse(ConfigurationManager.AppSettings.Get("ButtonStartStopPort"));
             _gpioOrange = new GpioController();
             _gpioOrange.OpenPin(_pin);
             _gpioOrange.SetPinMode(_pin, PinMode.Input);
@@ -30,7 +30,7 @@ namespace ConsoleSerialPort
 
         public string GetData()
         {
-            bool currentButtonStatus = _gpioOrange.Read(_pin) == PinValue.Low ? true : false;
+            bool currentButtonStatus = _gpioOrange!.Read(_pin) == PinValue.Low ? true : false;
 
             if (currentButtonStatus && (PreviousPushTime < DateTime.Now.AddMilliseconds(-300)))
             {

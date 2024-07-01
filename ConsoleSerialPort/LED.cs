@@ -32,21 +32,21 @@ namespace ConsoleSerialPort
             AllOff();
             foreach (int pin in _ledsPin)
             {
-                _gpioOrange.Write(pin, PinValue.High);
+                _gpioOrange!.Write(pin, PinValue.High);
             }
         }
         public static void AllOff ()
         {
             foreach (int pin in _ledsPin)
             {
-                _gpioOrange.Write(pin, PinValue.Low);
+                _gpioOrange!.Write(pin, PinValue.Low);
             }
             isBlink = false;
         }
         public static void On(LedColor color)
         {
             AllOff();
-            _gpioOrange.Write(_ledsPin[(int)color], PinValue.High);
+            _gpioOrange!.Write(_ledsPin[(int)color], PinValue.High);
         }
         public static void Off(LedColor color)
         {
@@ -59,7 +59,7 @@ namespace ConsoleSerialPort
 
             while (isBlink)
             {
-                _gpioOrange.Write(_ledsPin[(int)color], PinValue.High);
+                _gpioOrange!.Write(_ledsPin[(int)color], PinValue.High);
                 await Task.Delay(1000);
                 foreach (int pin in _ledsPin)
                 {

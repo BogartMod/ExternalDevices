@@ -36,62 +36,9 @@ namespace ConsoleSerialPort
 
             var encoder = new Encoder();
             var buttonStartStop = new ButtonStartStop();
-            WaitPressButtonAsync();
-            LED.BlinkAsync(LedColor.Green);
-            while (true)
-            {
-
-                Console.WriteLine("Ожидание комманды.");
-                string cons = Console.ReadLine();
-                
-
-                switch (cons)
-                {
-                    case "start":
-                        Start();
-                        break;
-
-                    case "stop":
-                        Stop();
-                        break;
-
-                    case "exit":
-                        Exit();
-                        break;
-
-                    case "options":
-                        Console.WriteLine("пока не реализовано");
-                        break;
-
-                    case "help":
-                        Console.WriteLine("start - запуск отслеживания");
-                        Console.WriteLine("stop - остановка ослеживания");
-                        Console.WriteLine("exit - завершить программу");
-                        Console.WriteLine("options - настройки");
-                        Console.WriteLine("help - вывод подсказки");
-                        break;
-
-                    case "LedOn":
-                        LED.AllOn();
-                        break;
-                    case "LedOff":
-                        LED.AllOff();
-                        break;
-                    case "LedGreen":
-                        LED.On(LedColor.Green);
-                        break;
-                    case "LedYellow":
-                        LED.On(LedColor.Yellow);
-                        break;
-                    case "LedRed":
-                        LED.On(LedColor.Red);
-                        break;
-
-                    default:
-                        Console.WriteLine("Неизвестная комманда. Список комманд: help");
-                        break;
-                }
-            } 
+            Task taskButtonLisnening = WaitPressButtonAsync();
+            Task taskLedBlink = LED.BlinkAsync(color: LedColor.Green);
+            ConsoleListen();
 
             void Start()
             {
@@ -106,7 +53,7 @@ namespace ConsoleSerialPort
             {
                 isEnabled = false;
                 izmDiam.Disconnect();
-                LED.BlinkAsync(LedColor.Green);
+                Task TaskLedBlink = LED.BlinkAsync(color: LedColor.Green);
                 //if (IzmWorkTask != null) await IzmWorkTask;
                 Console.WriteLine("Останавливаем");
                 
@@ -137,8 +84,9 @@ namespace ConsoleSerialPort
 
 
 #if DEBUG
-                            Console.WriteLine(dataXY[0]);
-                            Console.WriteLine(currentLength);
+                            
+                            Console.WriteLine("{0,22 } : {1,-8},{2,-8}", "DiamXY:", fileData.Data[i].DiamX, fileData.Data[i].DiamY);
+                            //Console.WriteLine("Current Distance-Speed: {0,-8} : {1,8}", fileData.Data[i].CurrentDistance, fileData.Data[i].CurrentSpeed);
 #endif
 
                             await Task.Delay(_delayMS);
@@ -147,11 +95,13 @@ namespace ConsoleSerialPort
                         //izmDiam.Stop(); //todo:test
                         
                         fileData.SaveToFileAsync();
+                        fileData.Data.Clear();
                     }
                 }
 
                 catch (Exception ex)
                 {
+                    Console.WriteLine("Ошибка разделения данных");
                     Console.WriteLine(ex.Message);
                     LED.On(LedColor.Red);
                 }
@@ -193,6 +143,63 @@ namespace ConsoleSerialPort
                 LED.AllOff();
                 Environment.Exit(0);
             }
+
+            void ConsoleListen()
+            {
+                while (true)
+                {
+                    Console.WriteLine("Ожидание комманды.");
+                    string cons = Console.ReadLine();
+
+
+                    switch (cons)
+                    {
+                        case "start":
+                            Start();
+                            break;
+
+                        case "stop":
+                            Stop();
+                            break;
+
+                        case "exit":
+                            Exit();
+                            break;
+
+                        case "options":
+                            Console.WriteLine("пока не реализовано");
+                            break;
+
+                        case "help":
+                            Console.WriteLine("start - запуск отслеживания");
+                            Console.WriteLine("stop - остановка ослеживания");
+                            Console.WriteLine("exit - завершить программу");
+                            Console.WriteLine("options - настройки");
+                            Console.WriteLine("help - вывод подсказки");
+                            break;
+
+                        case "LedOn":
+                            LED.AllOn();
+                            break;
+                        case "LedOff":
+                            LED.AllOff();
+                            break;
+                        case "LedGreen":
+                            LED.On(LedColor.Green);
+                            break;
+                        case "LedYellow":
+                            LED.On(LedColor.Yellow);
+                            break;
+                        case "LedRed":
+                            LED.On(LedColor.Red);
+                            break;
+
+                        default:
+                            Console.WriteLine("Неизвестная комманда. Список комманд: help");
+                            break;
+                    }
+                }
+            } 
 
         }
 

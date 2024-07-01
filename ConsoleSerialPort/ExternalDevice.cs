@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using System.Configuration;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Linq.Expressions;
 
 namespace ConsoleSerialPort
 {
@@ -56,7 +57,7 @@ namespace ConsoleSerialPort
                 //_gpioOrange.OpenPin(_serial_swich);
                 if ((_serial485ToTTL == null) || (!_serial485ToTTL.IsOpen))
                 {
-                    _serial485ToTTL = SerialConnect(SerialPort, SerialPortSpeed);
+                    _serial485ToTTL = SerialConnect(SerialPort!, SerialPortSpeed);
                     _serial485ToTTL.ReadTimeout = 100;
                     _serial485ToTTL.WriteTimeout = 100;
                 }                    
@@ -64,6 +65,7 @@ namespace ConsoleSerialPort
             }
             catch (Exception ex)
             {
+                Console.WriteLine("Ошибка подключения к 485");
                 Console.WriteLine(ex.Message);
                 LED.On(LedColor.Red);
             }
@@ -78,8 +80,8 @@ namespace ConsoleSerialPort
             if (IsConnected)
             {
                 //_gpioOrange?.ClosePin(_serial_swich);
-                //_gpioOrange?.Disconnect();
-                _serial485ToTTL?.Close();
+                //_gpioOrange?.Disconnect();stop
+                _serial485ToTTL!.Close();
 
                 //_gpioOrange = null;
                 _serial485ToTTL = null;
@@ -95,7 +97,7 @@ namespace ConsoleSerialPort
             try
             {
                 //_gpioOrange.Write(_serial_swich, PinValue.High);
-                _serial485ToTTL.Write(SentMessage.CreateMessage(), 0, 8);
+                _serial485ToTTL!.Write(SentMessage.CreateMessage(), 0, 8);
                 //_gpioOrange.Write(_serial_swich, PinValue.Low);
                 var byteBuffer = this.ReadData();
                 //CheckResponse(byteBuffer);
@@ -106,6 +108,7 @@ namespace ConsoleSerialPort
 
             catch (Exception ex)
             {
+                Console.WriteLine("Ошибка получения данных");
                 Console.WriteLine(ex.Message);
                 LED.On(LedColor.Red);
                 return ex.Message;
@@ -115,23 +118,46 @@ namespace ConsoleSerialPort
         }
 
 
-        private byte[] ReadData()
+        private List<int> ReadData()
         {
-            int offset = 0;
-            var byteBuffer = new byte[13];
-            try
+            int _dataInt;
+            var byteBuffer = new byte[14];
+            var data = new List<int>();
+                
+                    //while (DataInt < byteBuffer.Length)
+                    //{
+                    //    DataInt += _serial485ToTTL!.Read(
+                    //       byteBuffer, DataInt, byteBuffer.Length - DataInt);
+                    //    //data.Add(_serial485ToTTL.ReadLine());
+                    //    //Console.WriteLine(data[data.Count - 1]);
+
+                    //}
+
+                    //for (int i = 0; i < 14; i++)
+                    //{
+                    //    data.Add(_serial485ToTTL.ReadByte());
+                    //}
+                
+
+            do
             {
-                while (offset < byteBuffer.Length)
+                try
                 {
-                    offset += _serial485ToTTL.Read(byteBuffer, offset, byteBuffer.Length - offset);
+                    _dataInt = _serial485ToTTL.ReadByte();
                 }
+                catch (TimeoutException)
+                {
+                    _dataInt = -1;
+                }
+                
+                data.Add(_dataInt);
+
+                Console.Write(_dataInt + " ");
             }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-                LED.On(LedColor.Red);
-            }
-            return byteBuffer;
+            while (_dataInt >= 0);
+
+            
+            return data;
         }
 
         static void CheckResponse(byte[] respones)
