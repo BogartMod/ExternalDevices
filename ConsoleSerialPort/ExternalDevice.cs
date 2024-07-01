@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using System.Configuration;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Linq.Expressions;
 
 namespace ConsoleSerialPort
 {
@@ -56,7 +57,7 @@ namespace ConsoleSerialPort
                 //_gpioOrange.OpenPin(_serial_swich);
                 if ((_serial485ToTTL == null) || (!_serial485ToTTL.IsOpen))
                 {
-                    _serial485ToTTL = SerialConnect(SerialPort, SerialPortSpeed);
+                    _serial485ToTTL = SerialConnect(SerialPort!, SerialPortSpeed);
                     _serial485ToTTL.ReadTimeout = 100;
                     _serial485ToTTL.WriteTimeout = 100;
                 }                    
@@ -64,6 +65,7 @@ namespace ConsoleSerialPort
             }
             catch (Exception ex)
             {
+                Console.WriteLine("Ошибка подключения к 485");
                 Console.WriteLine(ex.Message);
                 LED.On(LedColor.Red);
             }
@@ -78,8 +80,8 @@ namespace ConsoleSerialPort
             if (IsConnected)
             {
                 //_gpioOrange?.ClosePin(_serial_swich);
-                //_gpioOrange?.Disconnect();
-                _serial485ToTTL?.Close();
+                //_gpioOrange?.Disconnect();stop
+                _serial485ToTTL!.Close();
 
                 //_gpioOrange = null;
                 _serial485ToTTL = null;
@@ -95,17 +97,22 @@ namespace ConsoleSerialPort
             try
             {
                 //_gpioOrange.Write(_serial_swich, PinValue.High);
-                _serial485ToTTL.Write(SentMessage.CreateMessage(), 0, 8);
+                _serial485ToTTL!.Write(SentMessage.CreateMessage(), 0, 8);
                 //_gpioOrange.Write(_serial_swich, PinValue.Low);
-                var byteBuffer = this.ReadData();
-                //CheckResponse(byteBuffer);
-                int withX = byteBuffer[3] << 8 | byteBuffer[4];
-                int withY = byteBuffer[5] << 8 | byteBuffer[6];
+                var bufferInt = this.ReadData();
+                if (bufferInt[0] == -1)
+                {
+                    bufferInt = this.ReadData();
+                }
+                //CheckResponse(bufferInt);
+                int withX = bufferInt[3] << 8 | bufferInt[4];
+                int withY = bufferInt[5] << 8 | bufferInt[6];
                 return withX.ToString() + ' ' + withY.ToString();
             }
 
             catch (Exception ex)
             {
+                Console.WriteLine("Ошибка получения данных");
                 Console.WriteLine(ex.Message);
                 LED.On(LedColor.Red);
                 return ex.Message;
@@ -115,23 +122,31 @@ namespace ConsoleSerialPort
         }
 
 
-        private byte[] ReadData()
+        private List<int> ReadData()
         {
-            int offset = 0;
-            var byteBuffer = new byte[13];
-            try
+            int _dataInt;
+            var byteBuffer = new byte[14];
+            var data = new List<int>();
+
+            do
             {
-                while (offset < byteBuffer.Length)
+                try
                 {
-                    offset += _serial485ToTTL.Read(byteBuffer, offset, byteBuffer.Length - offset);
+                    _dataInt = _serial485ToTTL.ReadByte();
                 }
+                catch (TimeoutException)
+                {
+                    _dataInt = -1;
+                }
+                
+                data.Add(_dataInt);
+#if DEBUG
+                Console.Write(_dataInt + " ");
+#endif
             }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-                LED.On(LedColor.Red);
-            }
-            return byteBuffer;
+            while (_dataInt >= 0);
+               
+            return data;
         }
 
         static void CheckResponse(byte[] respones)
@@ -266,48 +281,4 @@ namespace ConsoleSerialPort
         }
 
     }
-
-    //class ButtonStartStop : ExternalDevice
-    //{
-    //    private GpioController? _gpioOrange;
-    //    int _pin;
-
-    //    private PinValue previousValue;
-        
-    //    private DateTime PreviousPushTime { get; set; }
-        
-    //    public ButtonStartStop()
-    //    {
-
-    //        _pin = Int32.Parse(ConfigurationManager.AppSettings.Get("ButtonStartStopPort"));
-    //        _gpioOrange = new GpioController();
-    //        _gpioOrange.OpenPin(_pin);
-    //        _gpioOrange.SetPinMode(_pin, PinMode.Input);
-    //        PreviousPushTime = DateTime.Now;
-    //    }
-
-    //    public override bool Connect()
-    //    {
-    //        return true;
-    //        throw new NotImplementedException();
-    //    }
-
-    //    public override void Disconnect()
-    //    {
-    //        return;
-    //        throw new NotImplementedException();
-    //    }
-
-    //    public override string GetData()
-    //    {
-    //        bool currentButtonStatus = _gpioOrange.Read(_pin) == PinValue.Low ? true : false;
-
-    //        if (currentButtonStatus && (PreviousPushTime < DateTime.Now.AddMilliseconds(-300)))
-    //        {
-    //            PreviousPushTime = DateTime.Now;
-    //            return "true";
-    //        }
-    //        return "false";
-    //    }
-    //}
 }

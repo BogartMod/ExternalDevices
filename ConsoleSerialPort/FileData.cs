@@ -14,11 +14,11 @@ namespace ConsoleSerialPort
     {
         public class DataPackage
         {
-            public string DiamX {  get; set; }
-            public string DiamY { get; set; }
+            public string? DiamX {  get; set; }
+            public string? DiamY { get; set; }
             public int CurrentDistance { get; set; } = 0;
-            public string CurrentSpeed { get; set; }
-            public string CurrentTime { get; set; }
+            public string? CurrentSpeed { get; set; }
+            public string? CurrentTime { get; set; }
         } 
 
         public string LineName { get; set; }
@@ -37,7 +37,7 @@ namespace ConsoleSerialPort
         {
             try
             {
-                using (FileStream fs = new FileStream( DateTime.Now.ToString("yy-MM-dd-hh") + ".json", FileMode.Append))
+                using (FileStream fileStream = new FileStream("files/" + DateTime.Now.ToString("yy-MM-dd-HH-mm") + ".json", FileMode.Append))
                 {
 
                     var options = new JsonSerializerOptions
@@ -46,13 +46,17 @@ namespace ConsoleSerialPort
                         IgnoreReadOnlyProperties = false,
 
                     };
-                    await JsonSerializer.SerializeAsync<FileData>(fs, this);
+                    await JsonSerializer.SerializeAsync<FileData>(fileStream, this);
+
+#if DEBUG
                     Console.WriteLine("Данные сохранены в файл.");
+#endif
                 }
-                
+
             }
             catch (Exception ex)
-            { 
+            {
+                Console.WriteLine("Ошибка сохранения данных");
                 Console.WriteLine(ex.ToString());
                 LED.On(LedColor.Red);
             }
