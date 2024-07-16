@@ -95,7 +95,7 @@ namespace ConsoleSerialPort
             //IsEnabled = true;
             
             try
-            {
+            { 
                 //_gpioOrange.Write(_serial_swich, PinValue.High);
                 _serial485ToTTL!.Write(SentMessage.CreateMessage(), 0, 8);
                 //_gpioOrange.Write(_serial_swich, PinValue.Low);
