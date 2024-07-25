@@ -234,14 +234,14 @@ namespace ConsoleSerialPort
 
         public Encoder()
         {
-
-            countMeashurements = Int32.Parse(ConfigurationManager.AppSettings.Get("EncoderNumberOfMeasurements"));
-            _pinA = Int32.Parse(ConfigurationManager.AppSettings.Get("EncoderPortA"));
+            Int32.TryParse(ConfigurationManager.AppSettings.Get("EncoderNumberOfMeasurements"), out countMeashurements);
+            Int32.TryParse(ConfigurationManager.AppSettings.Get("EncoderPortA"), out _pinA);
+            
             _gpioOrange = new GpioController();
             _gpioOrange.OpenPin(_pinA, PinMode.Input);
 
-            _encoderResolution = Int32.Parse(ConfigurationManager.AppSettings.Get("EncoderResolution"));
-            _encoderLengthRoll = Int32.Parse(ConfigurationManager.AppSettings.Get("EncoderLengthRoll"));
+            Int32.TryParse(ConfigurationManager.AppSettings.Get("EncoderResolution"), out _encoderResolution);
+            Int32.TryParse(ConfigurationManager.AppSettings.Get("EncoderLengthRoll"), out _encoderLengthRoll);
         }
 
         public override bool Connect()
