@@ -224,61 +224,61 @@ namespace ConsoleSerialPort
 
     }
 
-    class Encoder:ExternalDevice
-    {
-        private GpioController? _gpioOrange;
-        int countMeashurements;
-        int _pinA;
-        int _encoderResolution;
-        int _encoderLengthRoll;
+    //class Encoder:ExternalDevice
+    //{
+    //    private GpioController? _gpioOrange;
+    //    int countMeashurements;
+    //    int _pinA;
+    //    int _encoderResolution;
+    //    int _encoderLengthRoll;
 
-        public Encoder()
-        {
-            Int32.TryParse(ConfigurationManager.AppSettings.Get("EncoderNumberOfMeasurements"), out countMeashurements);
-            Int32.TryParse(ConfigurationManager.AppSettings.Get("EncoderPortA"), out _pinA);
+    //    public Encoder()
+    //    {
+    //        Int32.TryParse(ConfigurationManager.AppSettings.Get("EncoderNumberOfMeasurements"), out countMeashurements);
+    //        Int32.TryParse(ConfigurationManager.AppSettings.Get("EncoderPortA"), out _pinA);
             
-            _gpioOrange = new GpioController();
-            _gpioOrange.OpenPin(_pinA, PinMode.Input);
+    //        _gpioOrange = new GpioController();
+    //        _gpioOrange.OpenPin(_pinA, PinMode.Input);
 
-            Int32.TryParse(ConfigurationManager.AppSettings.Get("EncoderResolution"), out _encoderResolution);
-            Int32.TryParse(ConfigurationManager.AppSettings.Get("EncoderLengthRoll"), out _encoderLengthRoll);
-        }
+    //        Int32.TryParse(ConfigurationManager.AppSettings.Get("EncoderResolution"), out _encoderResolution);
+    //        Int32.TryParse(ConfigurationManager.AppSettings.Get("EncoderLengthRoll"), out _encoderLengthRoll);
+    //    }
 
-        public override bool Connect()
-        {
-            return true;
-            throw new NotImplementedException();
-        }
+    //    public override bool Connect()
+    //    {
+    //        return true;
+    //        throw new NotImplementedException();
+    //    }
 
-        public override void Disconnect()
-        {
-            return;
-            throw new NotImplementedException();
-        }
+    //    public override void Disconnect()
+    //    {
+    //        return;
+    //        throw new NotImplementedException();
+    //    }
 
-        public override string GetData()
-        {
-            List<DateTime> meashurements = new List<DateTime>();
-            DateTime dateTimeStart = DateTime.Now;
-            PinValue PinValuePrevious = false;
-            PinValue pinValueCurrent = false;
-            int count = 0;
-            int length;
-            int speed;
-            while (DateTime.Now < dateTimeStart.AddSeconds(1))
-            {
-                pinValueCurrent = _gpioOrange!.Read(_pinA);
-                if (pinValueCurrent!= PinValuePrevious)
-                {
-                    PinValuePrevious = pinValueCurrent;
-                    count++;
-                }
-            }
-            length = _encoderLengthRoll*count/_encoderResolution;
-            speed = length * 60;
+    //    public override string GetData()
+    //    {
+    //        List<DateTime> meashurements = new List<DateTime>();
+    //        DateTime dateTimeStart = DateTime.Now;
+    //        PinValue PinValuePrevious = false;
+    //        PinValue pinValueCurrent = false;
+    //        int count = 0;
+    //        int length;
+    //        int speed;
+    //        while (DateTime.Now < dateTimeStart.AddSeconds(1))
+    //        {
+    //            pinValueCurrent = _gpioOrange!.Read(_pinA);
+    //            if (pinValueCurrent!= PinValuePrevious)
+    //            {
+    //                PinValuePrevious = pinValueCurrent;
+    //                count++;
+    //            }
+    //        }
+    //        length = _encoderLengthRoll*count/_encoderResolution;
+    //        speed = length * 60;
 
-            return length.ToString() + " " + speed.ToString();
-        }
+    //        return length.ToString() + " " + speed.ToString();
+    //    }
 
-    }
+    //}
 }
