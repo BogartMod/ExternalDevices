@@ -42,7 +42,8 @@ namespace ConsoleSerialPort
         {
             Name = ConfigurationManager.AppSettings.Get("IzmDiamName");
             Description = ConfigurationManager.AppSettings.Get("IzmDiamDescription");
-            //_serial_swich = Int32.Parse(ConfigurationManager.AppSettings.Get("serial_swich_port"));
+            //_serial_swich = Int32.Parse(
+            //ConfigurationManager.AppSettings.Get("serial_swich_port"));
             SerialPort = serialPort;
             SerialPortSpeed = serialSpeed;
             IsConnected = false;
