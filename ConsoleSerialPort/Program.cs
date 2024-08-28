@@ -1,6 +1,8 @@
 ﻿using System;
 using System.IO.Ports;
 using Iot.Device;
+using System.Net;
+using System.Text;
 using System.Device.Gpio;
 using System.Configuration;
 using System.Collections.Specialized;
@@ -20,7 +22,11 @@ namespace ConsoleSerialPort
             //CancellationToken token = cancelTokenSource.Token;
             bool isEnabled = false;
             LED.AllOn();
-            
+
+            var httpListener = new HttpListener();
+            HttpListenStart();
+            HttpListenAsync();
+
 
             var appSettings = ConfigurationManager.AppSettings;
 
@@ -39,6 +45,8 @@ namespace ConsoleSerialPort
             Task taskButtonLisnening = WaitPressButtonAsync();
             Task taskLedBlink = LED.BlinkAsync(color: LedColor.Green);
             ConsoleListen();
+
+
 
             void Start()
             {
@@ -142,6 +150,8 @@ namespace ConsoleSerialPort
                 izmDiam.Disconnect();
                 LED.AllOff();
                 Environment.Exit(0);
+                httpListener.Close();
+                httpListener.Stop();
             }
 
             void ConsoleListen()
@@ -200,6 +210,39 @@ namespace ConsoleSerialPort
                     }
                 }
             } 
+
+            void HttpListenStart()
+            {
+                
+                httpListener.Prefixes.Add("10.105.102.49:8080/current");
+
+                httpListener.Start();
+            }
+
+            async Task HttpListenAsync()
+            {
+                while (true)
+                {
+                    var context = await httpListener.GetContextAsync();
+                    var request = context.Request;
+                    var response = context.Response;
+
+                    // Обработка GET-запроса
+                    if (request.HttpMethod == "GET")
+                    {
+                        string responseString = "<html><body><h1>Hello, World!</h1></body></html>";
+                        byte[] buffer = Encoding.UTF8.GetBytes(responseString);
+
+                        response.ContentLength64 = buffer.Length;
+                        var output = response.OutputStream;
+                        output.Write(buffer, 0, buffer.Length);
+                        output.Close();
+                        Console.WriteLine("Ответ отправлен.");
+                    }
+
+                    // Можно добавить дополнительные проверки или логику
+                }
+            }
 
         }
 
