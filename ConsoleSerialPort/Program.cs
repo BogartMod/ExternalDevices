@@ -24,7 +24,7 @@ namespace ConsoleSerialPort
             LED.AllOn();
 
             var httpListener = new HttpListener();
-            HttpListenStart();
+            
             HttpListenAsync();
 
 
@@ -211,16 +211,12 @@ namespace ConsoleSerialPort
                 }
             } 
 
-            void HttpListenStart()
-            {
-                
-                httpListener.Prefixes.Add("10.105.102.49:8080/current");
-
-                httpListener.Start();
-            }
-
             async Task HttpListenAsync()
             {
+                httpListener.Prefixes.Add("http://10.105.102.49:8080/current/");
+
+                httpListener.Start();
+
                 while (true)
                 {
                     var context = await httpListener.GetContextAsync();
