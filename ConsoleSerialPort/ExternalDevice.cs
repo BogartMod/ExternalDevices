@@ -118,8 +118,35 @@ namespace ConsoleSerialPort
                 LED.On(LedColor.Red);
                 return ex.Message;
             }
-            
-            
+        }
+
+        public override string GetData()
+        {
+            //IsEnabled = true;
+
+            try
+            {
+                //_gpioOrange.Write(_serial_swich, PinValue.High);
+                _serial485ToTTL!.Write(SentMessage.CreateMessage(), 0, 8);
+                //_gpioOrange.Write(_serial_swich, PinValue.Low);
+                var bufferInt = this.ReadData();
+                if (bufferInt[0] == -1)
+                {
+                    bufferInt = this.ReadData();
+                }
+                //CheckResponse(bufferInt);
+                int withX = bufferInt[3] << 8 | bufferInt[4];
+                int withY = bufferInt[5] << 8 | bufferInt[6];
+                return withX.ToString() + ' ' + withY.ToString();
+            }
+
+            catch (Exception ex)
+            {
+                Console.WriteLine("Ошибка получения данных");
+                Console.WriteLine(ex.Message);
+                LED.On(LedColor.Red);
+                return ex.Message;
+            }
         }
 
 

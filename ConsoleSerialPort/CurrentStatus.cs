@@ -13,23 +13,20 @@ namespace ConsoleSerialPort
         static int diamX { get; set; } = 0;
         static int diamY { get; set; } = 0;
         static int diamMean { get; set; } = 0;
-        static int eccentricity { get; set; } = 0;
+        static int Eccentricity { get; set; } = 0;
+        static DateTime UpdateDataTime { get; set; } 
 
 
         static CurrentStatus()
         {
 
-            Speed = 0;
-            Length = 0;
-            diamMean = 0;
-            eccentricity = 0;
-            diamX = 0;
-            diamY = 0;
-
         }
 
         static void Update()
         {
+            string[] dataXY = izmDiam.GetData().Split(' ');
+            Int32.TryParse(dataXY[0],out diamX);
+            diamY = dataXY[1];
 
         }
 
