@@ -6,7 +6,9 @@ using System.Threading.Tasks;
 
 namespace ConsoleSerialPort.DTOClass
 {
-    internal class DataEncoder
+    internal class EncoderDTO
     {
+        int Length { get; set; }
+        int Speed { get; set; }
     }
 }

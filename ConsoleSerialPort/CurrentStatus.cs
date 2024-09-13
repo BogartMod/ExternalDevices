@@ -10,9 +10,9 @@ namespace ConsoleSerialPort
     {
         static int Speed { get; set; } = 0;
         static int Length { get; set; } = 0;
-        static int diamX { get; set; } = 0;
-        static int diamY { get; set; } = 0;
-        static int diamMean { get; set; } = 0;
+        static int DiamX { get; set; } = 0;
+        static int DiamY { get; set; } = 0;
+        static int DiamMean { get; set; } = 0;
         static int Eccentricity { get; set; } = 0;
         static DateTime UpdateDataTime { get; set; } 
 
@@ -26,7 +26,7 @@ namespace ConsoleSerialPort
         {
             string[] dataXY = izmDiam.GetData().Split(' ');
             Int32.TryParse(dataXY[0],out diamX);
-            diamY = dataXY[1];
+            DiamY = dataXY[1];
 
         }
 
