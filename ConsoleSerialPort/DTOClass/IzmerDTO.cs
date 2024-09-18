@@ -8,10 +8,10 @@ namespace ConsoleSerialPort.DTOClass
 {
     internal class IzmerDTO
     {
-        int DiamX { get; set; } = 0;
-        int DiamY { get; set; } = 0;
-        int DiamMean { get; set; } = 0;
-        int Eccentricity { get; set; } = 0;
-        DateTime UpdateDataTime { get; set; }
+        public int DiamX { get; set; } = 0;
+        public int DiamY { get; set; } = 0;
+        public int DiamMean => DiamX + DiamY / 2;
+        public int Eccentricity => DiamX - DiamY;
+        public DateTime UpdateDataTime { get; set; }
     }
 }

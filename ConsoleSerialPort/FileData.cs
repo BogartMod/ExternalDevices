@@ -16,6 +16,8 @@ namespace ConsoleSerialPort
         {
             public string? DiamX {  get; set; }
             public string? DiamY { get; set; }
+            public int DiamMean { get; set; }
+            public int Eccentricity { get; set; }
             public int CurrentDistance { get; set; } = 0;
             public string? CurrentSpeed { get; set; }
             public string? CurrentTime { get; set; }
@@ -30,7 +32,6 @@ namespace ConsoleSerialPort
             LineName = ConfigurationManager.AppSettings.Get("LineName");
             DataCapacity = Int32.Parse(ConfigurationManager.AppSettings.Get("DataCapacityStack"));
             Data = new List<DataPackage>(DataCapacity);
-            
         }
 
         public async Task SaveToFileAsync()
