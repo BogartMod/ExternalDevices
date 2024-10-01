@@ -78,11 +78,25 @@ namespace ConsoleSerialPort
                     {
                         for (int i = 0; (i < fileData.DataCapacity)&&isEnabled; i++)
                         {
-                            string[] dataXY = izmDiam.GetData().Split(' ');
+                            //string[] dataXY = izmDiam.GetData().Split(' ');
+
+                            //var dataIzm = izmDiam.GetDataDTO();
+
+                            //fileData.Data.Add(new FileData.DataPackage());
+                            //fileData.Data[i].DiamX = dataXY[0];
+                            //fileData.Data[i].DiamY = dataXY[1];
+                            //fileData.Data[i].CurrentTime = DateTime.Now.ToString("O");
+
+                            //string[] dataEncoder = encoder.GetData().Split(' ');
+                            //currentLength += Int32.Parse(dataEncoder[0]);
+                            //fileData.Data[i].CurrentDistance = currentLength;
+                            //fileData.Data[i].CurrentSpeed = dataEncoder[1];
+
+                            var dataIzm = izmDiam.GetDataDTO();
 
                             fileData.Data.Add(new FileData.DataPackage());
-                            fileData.Data[i].DiamX = dataXY[0];
-                            fileData.Data[i].DiamY = dataXY[1];
+                            fileData.Data[i].DiamX = dataIzm.DiamX;
+                            fileData.Data[i].DiamY = dataIzm.DiamY;
                             fileData.Data[i].CurrentTime = DateTime.Now.ToString("O");
 
                             string[] dataEncoder = encoder.GetData().Split(' ');
@@ -92,7 +106,7 @@ namespace ConsoleSerialPort
 
 
 #if DEBUG
-                            
+
                             Console.WriteLine("{0,22 } : {1,-8},{2,-8}", "DiamXY:", fileData.Data[i].DiamX, fileData.Data[i].DiamY);
                             //Console.WriteLine("Current Distance-Speed: {0,-8} : {1,8}", fileData.Data[i].CurrentDistance, fileData.Data[i].CurrentSpeed);
 #endif

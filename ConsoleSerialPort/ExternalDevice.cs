@@ -121,7 +121,7 @@ namespace ConsoleSerialPort
             }
         }
 
-        public IzmerDTO GetDataDTO( int tmp)
+        public IzmerDTO GetDataDTO()
         {
             var answ = new IzmerDTO();
             try

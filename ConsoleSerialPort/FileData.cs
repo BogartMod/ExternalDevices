@@ -14,8 +14,8 @@ namespace ConsoleSerialPort
     {
         public class DataPackage
         {
-            public string? DiamX {  get; set; }
-            public string? DiamY { get; set; }
+            public int DiamX {  get; set; }
+            public int DiamY { get; set; }
             public int DiamMean { get; set; }
             public int Eccentricity { get; set; }
             public int CurrentDistance { get; set; } = 0;
