@@ -94,6 +94,8 @@ namespace ConsoleSerialPort
 
                             var dataIzm = izmDiam.GetDataDTO();
 
+                            var dataIzm = izmDiam.GetDataDTO();
+
                             fileData.Data.Add(new FileData.DataPackage());
                             fileData.Data[i].DiamX = dataIzm.DiamX;
                             fileData.Data[i].DiamY = dataIzm.DiamY;
