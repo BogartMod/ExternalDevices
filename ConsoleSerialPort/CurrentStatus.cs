@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ConsoleSerialPort.DTOClass;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -14,7 +15,8 @@ namespace ConsoleSerialPort
         static int DiamY { get; set; } = 0;
         static int DiamMean { get; set; } = 0;
         static int Eccentricity { get; set; } = 0;
-        static DateTime UpdateDataTime { get; set; } 
+        static DateTime UpdateDTIzmer { get; set; }
+        static DateTime UpdateDTEncod { get; set; }
 
 
         static CurrentStatus()
@@ -22,12 +24,19 @@ namespace ConsoleSerialPort
 
         }
 
-        static void Update()
+        public static void UpdateIzmer(IzmerDTO izmerDTO)
         {
-            string[] dataXY = izmDiam.GetData().Split(' ');
-            Int32.TryParse(dataXY[0],out diamX);
-            DiamY = dataXY[1];
+            DiamX = izmerDTO.DiamX;
+            DiamY = izmerDTO.DiamY;
+            DiamMean = izmerDTO.DiamMean;
+            Eccentricity = izmerDTO.Eccentricity;
+        }
 
+        public static void UpdateEncoder(EncoderDTO encoderDTO)
+        {
+            Speed = encoderDTO.Speed; 
+            Length = encoderDTO.Length;
+            UpdateDTEncod = encoderDTO.UpdateDataTime;
         }
 
     }

@@ -93,8 +93,9 @@ namespace ConsoleSerialPort
                             //fileData.Data[i].CurrentSpeed = dataEncoder[1];
 
                             var dataIzm = izmDiam.GetDataDTO();
+                            CurrentStatus.UpdateIzmer(dataIzm);
 
-                            var dataIzm = izmDiam.GetDataDTO();
+                            
 
                             fileData.Data.Add(new FileData.DataPackage());
                             fileData.Data[i].DiamX = dataIzm.DiamX;

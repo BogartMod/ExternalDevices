@@ -8,7 +8,8 @@ namespace ConsoleSerialPort.DTOClass
 {
     internal class EncoderDTO
     {
-        int Length { get; set; }
-        int Speed { get; set; }
+        public int Length { get; set; }
+        public int Speed { get; set; }
+        public DateTime UpdateDataTime { get; set; }
     }
 }
