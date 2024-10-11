@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ConsoleSerialPort.DTOClass;
+using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Device.Gpio;
@@ -61,6 +62,30 @@ namespace ConsoleSerialPort
 
             return length.ToString() + " " + speed.ToString();
         }
+
+        public EncoderDTO GetDTO()
+        {
+            var dto = new EncoderDTO();
+            List<DateTime> meashurements = new List<DateTime>();
+            DateTime dateTimeStart = DateTime.Now;
+            PinValue PinValuePrevious = false;
+            PinValue pinValueCurrent = false;
+            int count = 0;
+
+            while (DateTime.Now < dateTimeStart.AddSeconds(1))
+            {
+                pinValueCurrent = _gpioOrange!.Read(_pinA);
+                if (pinValueCurrent != PinValuePrevious)
+                {
+                    PinValuePrevious = pinValueCurrent;
+                    count++;
+                }
+            }
+
+            dto.Length = _encoderLengthRoll * count / _encoderResolution;
+            dto.Speed = dto.Length * 60;
+
+            return dto;        }
 
     }
 }

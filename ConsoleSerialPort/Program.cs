@@ -95,19 +95,10 @@ namespace ConsoleSerialPort
                             var dataIzm = izmDiam.GetDataDTO();
                             CurrentStatus.UpdateIzmer(dataIzm);
 
+                            var dataEncoder = encoder.GetDTO();
+                            CurrentStatus.UpdateEncoder(dataEncoder);
+
                             
-
-                            fileData.Data.Add(new FileData.DataPackage());
-                            fileData.Data[i].DiamX = dataIzm.DiamX;
-                            fileData.Data[i].DiamY = dataIzm.DiamY;
-                            fileData.Data[i].CurrentTime = DateTime.Now.ToString("O");
-
-                            string[] dataEncoder = encoder.GetData().Split(' ');
-                            currentLength += Int32.Parse(dataEncoder[0]);
-                            fileData.Data[i].CurrentDistance = currentLength;
-                            fileData.Data[i].CurrentSpeed = dataEncoder[1];
-
-
 #if DEBUG
 
                             Console.WriteLine("{0,22 } : {1,-8},{2,-8}", "DiamXY:", fileData.Data[i].DiamX, fileData.Data[i].DiamY);
@@ -243,8 +234,15 @@ namespace ConsoleSerialPort
                     // Обработка GET-запроса
                     if (request.HttpMethod == "GET")
                     {
-                        string responseString = "<html><body><h1>Hello, World!</h1></body></html>";
-                        byte[] buffer = Encoding.UTF8.GetBytes(responseString);
+                        var responseString = new StringBuilder();
+                        responseString.Append("<html><body>" + 
+                            ConfigurationManager.AppSettings.Get("LineName") + 
+                            "</body></html></br>");
+                        responseString.Append(CurrentStatus.DiamX + "</br>");
+                        responseString.Append(CurrentStatus.DiamY + "</br>");
+
+
+                        byte[] buffer = Encoding.UTF8.GetBytes(responseString.ToString());
 
                         response.ContentLength64 = buffer.Length;
                         var output = response.OutputStream;
@@ -252,6 +250,8 @@ namespace ConsoleSerialPort
                         output.Close();
                         Console.WriteLine("Ответ отправлен.");
                     }
+
+
 
                     // Можно добавить дополнительные проверки или логику
                 }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ConsoleSerialPort.DTOClass;
+using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
@@ -19,7 +20,7 @@ namespace ConsoleSerialPort
             public int DiamMean { get; set; }
             public int Eccentricity { get; set; }
             public int CurrentDistance { get; set; } = 0;
-            public string? CurrentSpeed { get; set; }
+            public int CurrentSpeed { get; set; }
             public string? CurrentTime { get; set; }
         } 
 
@@ -30,8 +31,24 @@ namespace ConsoleSerialPort
         public FileData()
         {
             LineName = ConfigurationManager.AppSettings.Get("LineName");
-            DataCapacity = Int32.Parse(ConfigurationManager.AppSettings.Get("DataCapacityStack"));
+            DataCapacity = Int32.Parse(
+                ConfigurationManager.AppSettings.Get("DataCapacityStack"));
             Data = new List<DataPackage>(DataCapacity);
+        }
+
+        public void SaveData()
+        {
+            var package = new FileData.DataPackage
+            {
+                DiamX = CurrentStatus.DiamX,
+                DiamY = CurrentStatus.DiamY,
+                DiamMean = CurrentStatus.DiamMean,
+                Eccentricity = CurrentStatus.Eccentricity,
+                CurrentSpeed = CurrentStatus.Speed,
+                CurrentDistance = CurrentStatus.Length,
+                CurrentTime = CurrentStatus.UpdateDTIzmer.ToLongDateString(),
+            };
+            Data.Add(package);
         }
 
         public async Task SaveToFileAsync()
