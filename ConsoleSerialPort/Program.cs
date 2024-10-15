@@ -9,6 +9,7 @@ using System.Collections.Specialized;
 using static ConsoleSerialPort.IzmDiam;
 using ConsoleSerialPort;
 using System.Runtime.CompilerServices;
+using System.Text.Json;
 
 
 
@@ -234,12 +235,8 @@ namespace ConsoleSerialPort
                     // Обработка GET-запроса
                     if (request.HttpMethod == "GET")
                     {
-                        var responseString = new StringBuilder();
-                        responseString.Append("<html><body>" + 
-                            ConfigurationManager.AppSettings.Get("LineName") + 
-                            "</body></html></br>");
-                        responseString.Append(CurrentStatus.DiamX + "</br>");
-                        responseString.Append(CurrentStatus.DiamY + "</br>");
+                        var currStatus = new CurrentStatusWrapper();
+                        var responseString = currStatus.ToJson();
 
 
                         byte[] buffer = Encoding.UTF8.GetBytes(responseString.ToString());
